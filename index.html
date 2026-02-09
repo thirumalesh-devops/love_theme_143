@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>For Sathya 💌</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Styles -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- BACKGROUND MUSIC -->
+  <audio id="bgMusic" loop preload="auto">
+    <source src="https://my-love-proposal-assets.s3.us-east-1.amazonaws.com/WhatsApp+Audio+2026-01-11+at+7.03.05+PM.mpeg" type="audio/mpeg" />
+  </audio>
+
+  <!-- DEFAULT LOVE BUBBLES (hidden during night scene) -->
+  <div class="bubbles"></div>
+
+  <!-- NIGHT SKY OVERLAY (shown when the letter is open) -->
+  <div class="nightSky" id="nightSky" aria-hidden="true">
+    <div class="moon" aria-hidden="true"></div>
+    <!-- Stars, shooting stars & petals are injected by JS -->
+    <div class="plane" aria-hidden="true"></div>
+  </div>
+
+  <!-- GLOBAL BACK BUTTON (on every page except first) -->
+  <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
+
+  <!-- LOGIN SCREEN -->
+  <div class="loginScreen" id="loginScreen">
+    <h1>Welcome SaThya </h1>
+    <p>Login to see your surprise</p>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+    <p id="loginWait" class="wait"></p>
+    <p id="loginError" class="error"></p>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div class="home" id="homeScreen" style="display:none;">
+    <h2 class="welcome">A message from my heart 💖</h2>
+    <h1 class="name">SATHYA</h1>
+    <p class="quote">“You are the reason my heart smiles every day.”</p>
+    <p class="question">Will you be my Valentine?</p>
+    <div class="buttons">
+      <!-- YES opens the love-themed letter popup -->
+      <button class="yes" onclick="showMailIcon()">YES 💌</button>
+    </div>
+  </div>
+
+  <!-- (Optional) MAIL ICON POPUP — kept, but YES opens letter directly -->
+  <div class="popup" id="mailIconPopup">
+    <div class="popupContent">
+      <h2>💌 You have a mail!</h2>
+      <button onclick="showMailIcon()">Open Mail 📜</button>
+      <button class="back" onclick="navBack()">Back</button>
+    </div>
+  </div>
+
+  <!-- LEGACY: TRANSPARENT LETTER POPUP (kept for reference) -->
+  <div class="popup transparentOverlay" id="letterPopup" style="display:none;">
+    <div class="popupContent letterPanel">
+      <h2 class="letterTitle">Love Letter....!</h2>
+      <div id="letter"></div>
+      <div class="replyWrap">
+        <button class="replyBtn" onclick="openReplyPopup()">Reply 💬</button>
+      </div>
+      <div class="midBackWrap">
+        <button class="midBack" onclick="navBack()">Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW: LOVE-THEME BEAUTIFUL LETTER POPUP -->
+  <div class="popup" id="loveLetterPopup" style="display:none;">
+    <!-- Floating hearts overlay (below card) -->
+    <div class="loveOverlayHearts"></div>
+
+    <div class="popupContent">
+      <!-- Cupid arrow that orbits around the card border -->
+      <div class="borderArrow" aria-hidden="true"></div>
+
+      <div class="loveHeader">
+        <div class="heartBadge" aria-hidden="true"></div>
+        <div class="titleText">A Letter from My Heart</div>
+      </div>
+
+      <div class="loveBody">
+        <!-- Typewriter target -->
+        <div id="loveLetterContainer"></div>
+
+        <!-- Reply button -->
+        <div class="replyWrap">
+          <button class="replyBtn" onclick="openReplyPopup()">Reply 💬</button>
+        </div>
+
+        <!-- Centered back button -->
+        <div class="midBackWrap">
+          <button class="midBack" onclick="navBack()">Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPLY POPUP -->
+  <div class="popup transparentOverlay" id="replyPopup" style="display:none;">
+    <div class="popupContent replyPanel">
+      <h2 class="letterTitle">Send your reply</h2>
+      <p class="replyHint">Write your message to Thiru. It will be sent privately to his email.</p>
+      <textarea id="replyText" rows="6" placeholder="Type your reply here..."></textarea>
+      <div class="replyActions">
+        <button class="sendReply" id="sendReplyBtn" onclick="sendReply()">Send Reply 💌</button>
+        <button class="back" onclick="closeReplyPopup()">Cancel</button>
+      </div>
+      <p id="replyStatus" class="replyStatus" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
+  <div id="toast" class="toast" aria-live="polite"></div>
+
+  <!-- Script at end -->
+  <script src="script.js?v=987654324"></script>
+</body>
+</html>

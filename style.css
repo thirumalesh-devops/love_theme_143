@@ -1,0 +1,274 @@
+/* ====== TUNABLE SETTINGS ====== */
+:root {
+  --letter-max-width: 900px;
+  --letter-width-percent: 92%;
+
+  --letter-title-size: 1.8rem;
+  --letter-body-size: 1.16rem;
+  --letter-line-height: 1.85;
+
+  --letter-padding: 30px;
+  --letter-radius: 22px;
+
+  --midback-margin-top: 18px;
+
+  /* Arrow + path tuning */
+  --orbit-speed: 12s;     /* speed of arrow around card */
+  --orbit-gap: 10px;      /* distance from the card border */
+}
+
+/* Responsive adjustments */
+@media (max-width: 560px) {
+  :root {
+    --letter-max-width: 94vw;
+    --letter-width-percent: 96%;
+    --letter-title-size: 1.45rem;
+    --letter-body-size: 1.02rem;
+    --letter-padding: 22px;
+    --letter-radius: 16px;
+    --midback-margin-top: 14px;
+    --orbit-gap: 8px;
+  }
+}
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', sans-serif; }
+
+body {
+  height: 100vh;
+  background: radial-gradient(circle at top, #ff5fa2, #120014 70%);
+  color: white;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ===== GLOBAL BACK BUTTON ===== */
+.globalBack {
+  position: fixed; top: 16px; left: 16px; z-index: 4;
+  padding: 10px 16px; border-radius: 999px; background: rgba(25,25,25,0.75);
+  color: #fff; border: 1px solid rgba(255,255,255,0.25); cursor: pointer; backdrop-filter: blur(4px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+}
+.globalBack:hover { border-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.25); }
+
+/* Hide bubbles during night scene */
+body.night .bubbles { display: none; }
+
+/* ===== NIGHT SKY (brightened slightly) ===== */
+.nightSky {
+  position: fixed; inset: 0; z-index: 0;
+  opacity: 0; pointer-events: none; transition: opacity 0.9s ease;
+  background:
+    radial-gradient(1200px 800px at 75% 20%, rgba(160,180,255,0.45), rgba(14,14,28,0.85)),
+    linear-gradient(180deg, rgba(14,14,28,0.92) 0%, rgba(22,22,40,0.96) 100%);
+  /* gentle star glow layer to brighten scene */
+  box-shadow: inset 0 0 140px rgba(220,200,255,0.08);
+}
+body.night .nightSky { opacity: 1; }
+
+.star {
+  position: absolute; width: 2px; height: 2px; background: #ffffff; border-radius: 50%;
+  opacity: 0.75; filter: drop-shadow(0 0 6px rgba(255,255,255,0.95));
+  animation: twinkle 3.6s linear infinite;
+}
+@keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
+
+/* 🌕 Moon (slightly brighter) */
+.moon {
+  position: absolute; top: 7%; right: 7%; width: 130px; height: 130px; border-radius: 50%;
+  background:
+    radial-gradient(circle at 30% 30%, #fffdf4 0%, #fff2c9 45%, #ffe1a3 65%, #f3cc81 75%, #d5b062 100%);
+  box-shadow: 0 0 40px rgba(255,235,190,0.95), 0 0 130px rgba(255,220,160,0.8);
+  animation: moonPulse 6.5s ease-in-out infinite;
+}
+@keyframes moonPulse {
+  0%,100%{box-shadow:0 0 36px rgba(255,235,190,0.95),0 0 120px rgba(255,220,160,0.75);transform:scale(1)}
+  50%{box-shadow:0 0 56px rgba(255,235,190,1),0 0 160px rgba(255,220,160,0.95);transform:scale(1.02)}
+}
+
+/* ✈️ Plane */
+.plane {
+  position: absolute; top: var(--plane-top, 18%); left: -12vw; width:120px; height:28px;
+  background-image: url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 50'>\
+    <path d='M10 25 L150 25' stroke='%23ffffff' stroke-width='2' opacity='0.25'/>\
+    <g transform='translate(0,0)'>\
+      <path d='M0 25 L110 25 L140 18 L140 32 L110 25 Z' fill='%23e6f0ff' stroke='%23cfe3ff' stroke-width='2'/>\
+      <polygon points='110,25 150,10 150,40' fill='%23d7ecff'/>\
+      <rect x='100' y='21' width='14' height='8' fill='%239ec7ff'/>\
+      <circle cx='25' cy='25' r='6' fill='%23b3d4ff'/>\
+    </g>\
+  </svg>");
+  background-size: contain; background-repeat: no-repeat; opacity: 0.95;
+  animation: flyAcross var(--plane-dur, 18s) linear infinite;
+  filter: drop-shadow(0 0 10px rgba(255,255,255,0.9));
+}
+@keyframes flyAcross { 0%{transform:translateX(-12vw)} 45%{transform:translateX(55vw) translateY(-3vh)} 100%{transform:translateX(115vw) translateY(2vh)} }
+body:not(.night) .plane { display:none; }
+
+/* 🌠 Shooting stars */
+.shootingStar {
+  position: absolute; width: 140px; height: 2px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.95), rgba(255,255,255,0));
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.95)); opacity: 0.95;
+  pointer-events:none; transform-origin: left center; animation: shoot 1.6s linear forwards;
+}
+@keyframes shoot { 0%{transform:translate3d(0,0,0) rotate(var(--angle,-25deg));opacity:1} 100%{transform:translate3d(60vw,30vh,0) rotate(var(--angle,-25deg));opacity:0} }
+
+/* 🌹 Petals */
+.petal {
+  position: fixed; top:-10vh; width: var(--size,18px); height: var(--size,18px); left: var(--x,50vw);
+  background-image: url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>\
+    <path d='M32 8c10 0 20 10 20 20s-10 20-20 20S12 38 12 28 22 8 32 8z' fill='%23ff5c8a'/>\
+    <path d='M20 30c6 2 12 1 18-3' stroke='%23e23d6d' stroke-width='3' fill='none'/>\
+  </svg>");
+  background-size: contain; background-repeat: no-repeat; opacity: 0.9; pointer-events:none;
+  animation: petalFall var(--dur,10s) linear forwards;
+}
+@keyframes petalFall {
+  0%{transform:translate3d(0,-10vh,0) rotate(0deg);opacity:.95}
+  60%{transform:translate3d(var(--drift,12vw),60vh,0) rotate(180deg);opacity:.9}
+  100%{transform:translate3d(calc(var(--drift,12vw)*1.4),110vh,0) rotate(310deg);opacity:.85}
+}
+
+/* ===== HOME ===== */
+.home { height:100vh; text-align:center; display:flex; flex-direction:column; justify-content:center; z-index:1; position:relative; }
+.welcome{font-size:1.4rem; opacity:.9}
+.name{font-size:5rem; font-weight:bold; letter-spacing:10px; color:transparent; -webkit-text-stroke:2px rgba(255,255,255,0.6); text-shadow:0 0 25px rgba(255,0,120,0.8)}
+.quote{margin-top:10px; font-style:italic; color:#ffd1e8}
+.question{margin-top:30px; font-size:1.6rem}
+button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-size:1.1rem; cursor:pointer}
+.yes{background:linear-gradient(45deg,#ff2f92,#ff77c8); color:white; box-shadow:0 0 20px #ff2f92}
+
+/* ===== POPUPS BASE ===== */
+.popup {
+  position: fixed; inset:0; display:none; align-items:center; justify-content:center;
+  /* BRIGHTER overlay so background isn't dull */
+  background: radial-gradient(800px 400px at 50% 20%, rgba(255,160,210,0.25), rgba(0,0,0,0.25));
+  backdrop-filter: blur(1.5px);
+  z-index:2;
+}
+
+/* ===== LOVE THEME LETTER POPUP ===== */
+#loveLetterPopup { display:none; }
+
+#loveLetterPopup .popupContent {
+  position: relative; /* for arrow motion path */
+  width: min(92vw, 900px); max-width: 900px; padding:0;
+  border-radius: var(--letter-radius);
+  background:#ffffff; color:#111;
+  border: 1px solid rgba(255,120,170,0.45); /* nano light border */
+  box-shadow:
+    0 28px 64px rgba(0,0,0,0.28),
+    0 6px 18px rgba(0,0,0,0.14),
+    0 0 0 0.6px rgba(255,255,255,0.75) inset;
+  overflow:hidden;
+  z-index:3;
+}
+
+.loveHeader {
+  padding:18px 22px;
+  background:
+    radial-gradient(1200px 400px at 20% 0%, rgba(255,180,210,0.45), rgba(255,160,200,0.0)),
+    linear-gradient(90deg,#ff74b6 0%,#ff4f9a 50%,#ff74b6 100%);
+  color:#fff; display:flex; align-items:center; gap:12px;
+}
+.loveHeader .heartBadge { width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.18); display:grid; place-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.15) }
+.loveHeader .heartBadge::before { content:"💗"; font-size:22px }
+.loveHeader .titleText { font-size: var(--letter-title-size); font-weight: 700; letter-spacing: .3px }
+
+.loveBody {
+  padding: var(--letter-padding);
+  background:
+    radial-gradient(900px 320px at 14% 0%, rgba(255,245,250,0.92), rgba(255,255,255,1)),
+    #ffffff;
+}
+
+#loveLetterContainer {
+  font-size: var(--letter-body-size);
+  line-height: var(--letter-line-height);
+  color: #111;
+  min-height: 150px; text-align: left;
+}
+#loveLetterPopup .cursor { background-color:#111 }
+
+/* Buttons inside love card */
+#loveLetterPopup .replyBtn,
+#loveLetterPopup .midBack {
+  padding:10px 20px; border-radius:999px; border:1px solid rgba(255,120,170,0.45);
+  background: linear-gradient(45deg,#ffe4f0,#ffd8ea); color:#8a2e54; cursor:pointer;
+  transition: transform .1s ease, box-shadow .2s ease;
+}
+#loveLetterPopup .replyBtn:hover,
+#loveLetterPopup .midBack:hover { transform:translateY(-1px); box-shadow:0 8px 18px rgba(255,140,180,0.25) }
+.midBackWrap{display:flex; justify-content:center; margin-top:var(--midback-margin-top)}
+.replyWrap{display:flex; justify-content:center; margin-top:16px}
+
+/* Floating hearts overlay (subtle) */
+.loveOverlayHearts { position:absolute; inset:0; pointer-events:none; z-index:1 }
+.loveHeart {
+  position:absolute; width:14px; height:14px;
+  background: radial-gradient(circle at 30% 30%, #ff7ab3 0%, #ff408d 60%, #ff2f92 100%);
+  transform: rotate(45deg); border-radius:2px;
+  filter: drop-shadow(0 2px 6px rgba(255,80,140,0.5));
+  animation: floatHeart 6s ease-in-out infinite; opacity:.65;
+}
+.loveHeart::before, .loveHeart::after { content:""; position:absolute; width:14px; height:14px; border-radius:50%; background:inherit }
+.loveHeart::before { top:-7px; left:0 } .loveHeart::after{ left:-7px; top:0 }
+@keyframes floatHeart { 0%{transform:translateY(0) rotate(45deg) scale(.9);opacity:0} 15%{opacity:.6} 50%{transform:translateY(-40px) rotate(45deg) scale(1.03)} 100%{transform:translateY(-90px) rotate(45deg) scale(1.06);opacity:0} }
+
+/* ===== LOVE ARROW: ROTATES AROUND CARD BORDER ===== */
+/* We use CSS motion-path; JS writes the correct rounded-rect path to --orbit-path */
+.borderArrow {
+  position: absolute;
+  width: 30px; height: 30px;
+  /* Motion path is written to the element's style as `offset-path` via JS */
+  offset-rotate: auto;         /* arrow points along the path */
+  animation: orbitAround var(--orbit-speed) linear infinite;
+  z-index: 4; pointer-events: none;
+  filter: drop-shadow(0 0 8px rgba(255,120,170,0.85));
+  /* Cupid icon */
+  background-image: url("data:image/svg+xml;utf8,\
+  <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>\
+    <defs>\
+      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
+        <stop offset='0' stop-color='%23ff2f92'/>\
+        <stop offset='1' stop-color='%23ff77c8'/>\
+      </linearGradient>\
+    </defs>\
+    <path d='M12 52 L40 24' stroke='url(%23g)' stroke-width='5' stroke-linecap='round'/>\
+    <polygon points='40,24 53,20 49,33' fill='%23ff2f92'/>\
+    <path d='M14 48 C8 42, 10 34, 16 30 C20 27, 27 27, 30 30 C34 34, 34 42, 30 46 C26 50, 18 52, 14 48 Z' fill='%23ff5fa2'/>\
+  </svg>");
+  background-size: contain; background-repeat: no-repeat;
+}
+@keyframes orbitAround { from { offset-distance: 0%; } to { offset-distance: 100%; } }
+
+/* ===== TYPEWRITER CURSOR (legacy base) ===== */
+.cursor { display:inline-block; width:2px; background-color:#ffffff; animation: blink .7s infinite; vertical-align: bottom }
+@keyframes blink { 0%,50%,100%{opacity:1} 25%,75%{opacity:0} }
+
+/* ===== REPLY POPUP (unchanged) ===== */
+#replyPopup.transparentOverlay { background: transparent; }
+#replyPopup .popupContent {
+  width: min(92vw, 720px); max-width:720px; padding:22px; border-radius:16px;
+  background: rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.9);
+  color:#fff; box-shadow:none; backdrop-filter: blur(2px);
+}
+.replyPanel .replyHint{color:#f0f0f0; opacity:.9; margin:6px 0 10px; font-size:.95rem}
+#replyText{width:100%; min-height:140px; background:rgba(0,0,0,0.25); color:#fff; border:1px solid rgba(255,255,255,0.35); border-radius:10px; padding:12px; resize:vertical}
+#replyText::placeholder{color:rgba(255,255,255,0.6)}
+.replyActions{display:flex; gap:10px; justify-content:center; margin-top:14px}
+.sendReply{padding:10px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.35); background:#2a2a2a; color:#fff; cursor:pointer}
+.sendReply[disabled]{opacity:.6; cursor:not-allowed}
+.replyStatus{margin-top:10px; text-align:center}
+
+/* Toast */
+.toast{position:fixed; top:18px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); color:#fff; padding:10px 14px; border-radius:999px; z-index:5; opacity:0; pointer-events:none; transition:opacity .3s ease; border:1px solid rgba(255,255,255,0.2)}
+.toast.show{opacity:1}
+
+/* Accessibility: Reduce Motion */
+@media (prefers-reduced-motion: reduce) {
+  .plane, .shootingStar, .petal, .bubble, .loveHeart, .borderArrow { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
+  .moon { animation: none !important; }
+}
