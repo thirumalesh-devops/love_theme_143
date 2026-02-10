@@ -14,7 +14,7 @@ def add_cors(resp):
     return resp
 
 @app.route("/reply", methods=["POST", "OPTIONS"])
-def save_reply():
+def reply():
     if request.method == "OPTIONS":
         return make_response(("", 204))
 

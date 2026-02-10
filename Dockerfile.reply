@@ -1,0 +1,11 @@
+FROM python:3.11-alpine
+
+WORKDIR /app
+# Install Flask (small footprint)
+RUN pip install --no-cache-dir flask
+
+# Copy only the server file
+COPY server.py /app/server.py
+
+EXPOSE 8081
+CMD ["python", "server.py"]
