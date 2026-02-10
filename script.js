@@ -150,16 +150,38 @@ function openLoveLetter(){
 // Reply
 function openReplyPopup(){ replyText.value=""; replyStatus.textContent=""; openPopup(replyPopup); }
 function closeReplyPopup(silent=false){ closePopup(replyPopup); if (!silent) showToast("Reply closed"); }
-async function sendReply(){
-  const msg = replyText.value.trim();
-  if (!msg){ replyStatus.textContent="Please write a message before sending."; return; }
-  sendReplyBtn.disabled=true; replyStatus.textContent="Saving…";
-  try{
-    const res = await fetch(REPLY_ENDPOINT, { method:"POST", headers: { "Content-Type":"text/plain; charset=utf-8", "X-From":"Sathya" }, body: msg });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    replyStatus.textContent="Saved on server 💾"; showToast("Reply saved!");
-  }catch(e){ console.error(e); replyStatus.textContent="Failed to save. Please try again."; }
-  finally{ sendReplyBtn.disabled=false; }
+async function sendReply() {
+  const msg = (document.getElementById("replyText").value || "").trim();
+  if (!msg) {
+    replyStatus.textContent = "Please write a message before sending.";
+    return;
+  }
+
+  sendReplyBtn.disabled = true;
+  replyStatus.textContent = "Saving…";
+
+  try {
+    // Make it a "simple request": POST + text/plain + NO custom headers => no CORS preflight
+    const payload = `FROM: Sathya\n\n${msg}\n`;
+    const res = await fetch(REPLY_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+      body: payload
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`HTTP ${res.status} ${text}`);
+    }
+
+    replyStatus.textContent = "Saved on server 💾";
+    showToast("Reply saved!");
+  } catch (e) {
+    console.error("Reply save failed:", e);
+    replyStatus.textContent = "Failed to save. Please try again.";
+  } finally {
+    sendReplyBtn.disabled = false;
+  }
 }
 
 // Expose
