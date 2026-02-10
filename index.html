@@ -5,7 +5,7 @@
   <title>For Sathya 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css?v=2" />
+  <link rel="stylesheet" href="style.css?v=3" />
 </head>
 <body>
 
@@ -27,7 +27,7 @@
   <!-- GLOBAL BACK BUTTON (on every page except first) -->
   <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
 
-  <!-- ===== LOGIN SCREEN (centered) ===== -->
+  <!-- ===== LOGIN SCREEN (centered, no rectangular card) ===== -->
   <div class="loginScreen" id="loginScreen">
     <h1>Welcome SaThya </h1>
     <p>Login to see your surprise</p>
@@ -111,10 +111,10 @@
   <div class="popup transparentOverlay" id="replyPopup" style="display:none;">
     <div class="popupContent replyPanel">
       <h2 class="letterTitle">Send your reply</h2>
-      <p class="replyHint">Write your message to Thiru. It will be sent privately to his email.</p>
+      <p class="replyHint">Write your message to Thiru. It will be saved securely.</p>
       <textarea id="replyText" rows="6" placeholder="Type your reply here..."></textarea>
       <div class="replyActions">
-        <button class="sendReply" id="sendReplyBtn" onclick="sendReply()">Send Reply 💌</button>
+        <button class="sendReply" id="sendReplyBtn" onclick="sendReply()">Save Reply 💌</button>
         <button class="back" onclick="closeReplyPopup()">Cancel</button>
       </div>
       <p id="replyStatus" class="replyStatus" aria-live="polite"></p>
@@ -125,6 +125,6 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script at end -->
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>

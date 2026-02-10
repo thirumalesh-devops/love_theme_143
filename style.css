@@ -53,18 +53,18 @@ body {
 /* Hide bubbles during night scene */
 body.night .bubbles { display: none; }
 
-/* ===== NIGHT SKY (brightened slightly) ===== */
+/* ===== BRIGHT NIGHT SKY ===== */
 .nightSky {
   position: fixed; inset: 0; z-index: 0;
   opacity: 0; pointer-events: none; transition: opacity 0.9s ease;
   background:
     radial-gradient(1200px 800px at 75% 20%, rgba(160,180,255,0.45), rgba(14,14,28,0.85)),
     linear-gradient(180deg, rgba(14,14,28,0.92) 0%, rgba(22,22,40,0.96) 100%);
-  /* gentle star glow layer to brighten scene */
   box-shadow: inset 0 0 140px rgba(220,200,255,0.08);
 }
 body.night .nightSky { opacity: 1; }
 
+/* Stars */
 .star {
   position: absolute; width: 2px; height: 2px; background: #ffffff; border-radius: 50%;
   opacity: 0.75; filter: drop-shadow(0 0 6px rgba(255,255,255,0.95));
@@ -72,7 +72,7 @@ body.night .nightSky { opacity: 1; }
 }
 @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
 
-/* 🌕 Moon (slightly brighter) */
+/* 🌕 Moon */
 .moon {
   position: absolute; top: 7%; right: 7%; width: 130px; height: 130px; border-radius: 50%;
   background:
@@ -143,7 +143,6 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 /* ===== POPUPS BASE ===== */
 .popup {
   position: fixed; inset:0; display:none; align-items:center; justify-content:center;
-  /* BRIGHTER overlay so background isn't dull */
   background: radial-gradient(800px 400px at 50% 20%, rgba(255,160,210,0.25), rgba(0,0,0,0.25));
   backdrop-filter: blur(1.5px);
   z-index:2;
@@ -151,13 +150,11 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 
 /* ===== LOVE THEME LETTER POPUP ===== */
 #loveLetterPopup { display:none; }
-
 #loveLetterPopup .popupContent {
-  position: relative; /* for arrow motion path */
-  width: min(92vw, 900px); max-width: 900px; padding:0;
+  position: relative; width: min(92vw, 900px); max-width: 900px; padding:0;
   border-radius: var(--letter-radius);
   background:#ffffff; color:#111;
-  border: 1px solid rgba(255,120,170,0.45); /* nano light border */
+  border: 1px solid rgba(255,120,170,0.45);
   box-shadow:
     0 28px 64px rgba(0,0,0,0.28),
     0 6px 18px rgba(0,0,0,0.14),
@@ -165,7 +162,6 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   overflow:hidden;
   z-index:3;
 }
-
 .loveHeader {
   padding:18px 22px;
   background:
@@ -192,7 +188,6 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 }
 #loveLetterPopup .cursor { background-color:#111 }
 
-/* Buttons inside love card */
 #loveLetterPopup .replyBtn,
 #loveLetterPopup .midBack {
   padding:10px 20px; border-radius:999px; border:1px solid rgba(255,120,170,0.45);
@@ -204,7 +199,6 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .midBackWrap{display:flex; justify-content:center; margin-top:var(--midback-margin-top)}
 .replyWrap{display:flex; justify-content:center; margin-top:16px}
 
-/* Floating hearts overlay (subtle) */
 .loveOverlayHearts { position:absolute; inset:0; pointer-events:none; z-index:1 }
 .loveHeart {
   position:absolute; width:14px; height:14px;
@@ -217,24 +211,19 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .loveHeart::before { top:-7px; left:0 } .loveHeart::after{ left:-7px; top:0 }
 @keyframes floatHeart { 0%{transform:translateY(0) rotate(45deg) scale(.9);opacity:0} 15%{opacity:.6} 50%{transform:translateY(-40px) rotate(45deg) scale(1.03)} 100%{transform:translateY(-90px) rotate(45deg) scale(1.06);opacity:0} }
 
-/* ===== LOVE ARROW: ROTATES AROUND CARD BORDER ===== */
+/* ===== LOVE ARROW ANIMATION ===== */
 .borderArrow {
-  position: absolute;
-  width: 30px; height: 30px;
-  /* Motion path handled in JS (offset-path) */
-  offset-rotate: auto;         /* arrow points along the path */
+  position: absolute; width: 30px; height: 30px;
+  /* We'll set offset-path in JS when the popup opens */
+  offset-rotate: auto;
   animation: orbitAround var(--orbit-speed) linear infinite;
   z-index: 4; pointer-events: none;
   filter: drop-shadow(0 0 8px rgba(255,120,170,0.85));
-  /* Cupid icon */
   background-image: url("data:image/svg+xml;utf8,\
   <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'>\
-    <defs>\
-      <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
-        <stop offset='0' stop-color='%23ff2f92'/>\
-        <stop offset='1' stop-color='%23ff77c8'/>\
-      </linearGradient>\
-    </defs>\
+    <defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\
+      <stop offset='0' stop-color='%23ff2f92'/><stop offset='1' stop-color='%23ff77c8'/>\
+    </linearGradient></defs>\
     <path d='M12 52 L40 24' stroke='url(%23g)' stroke-width='5' stroke-linecap='round'/>\
     <polygon points='40,24 53,20 49,33' fill='%23ff2f92'/>\
     <path d='M14 48 C8 42, 10 34, 16 30 C20 27, 27 27, 30 30 C34 34, 34 42, 30 46 C26 50, 18 52, 14 48 Z' fill='%23ff5fa2'/>\
@@ -243,11 +232,11 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 }
 @keyframes orbitAround { from { offset-distance: 0%; } to { offset-distance: 100%; } }
 
-/* ===== TYPEWRITER CURSOR (legacy base) ===== */
+/* ===== TYPEWRITER CURSOR ===== */
 .cursor { display:inline-block; width:2px; background-color:#ffffff; animation: blink .7s infinite; vertical-align: bottom }
 @keyframes blink { 0%,50%,100%{opacity:1} 25%,75%{opacity:0} }
 
-/* ===== REPLY POPUP (unchanged) ===== */
+/* ===== REPLY POPUP ===== */
 #replyPopup.transparentOverlay { background: transparent; }
 #replyPopup .popupContent {
   width: min(92vw, 720px); max-width:720px; padding:22px; border-radius:16px;
@@ -266,15 +255,7 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .toast{position:fixed; top:18px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.75); color:#fff; padding:10px 14px; border-radius:999px; z-index:5; opacity:0; pointer-events:none; transition:opacity .3s ease; border:1px solid rgba(255,255,255,0.2)}
 .toast.show{opacity:1}
 
-/* ===== Accessibility: Reduce Motion ===== */
-@media (prefers-reduced-motion: reduce) {
-  .plane, .shootingStar, .petal, .bubble, .loveHeart, .borderArrow { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; }
-  .moon { animation: none !important; }
-}
-
-/* ================================================================== */
-/* ====================  LOGIN: CENTERED & CLEAN  ==================== */
-/* ================================================================== */
+/* ===== LOGIN (CENTERED, NO RECTANGLE) ===== */
 .loginScreen{
   min-height: 100vh;
   width: 100%;
@@ -286,7 +267,8 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   gap: 10px;
   padding: 20px;
   position: relative;
-  z-index: 1;                    /* above background layers */
+  z-index: 1;                    /* above backgrounds */
+  /* no container/card styles at all */
 }
 
 .loginScreen h1{
@@ -301,11 +283,11 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   margin-bottom: 6px;
 }
 
-/* Inputs + button sizing */
+/* Inputs + button: pill look */
 .loginScreen input{
   width: min(92vw, 320px);
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: 999px;
   border: 1px solid rgba(255,255,255,0.28);
   background: rgba(255,255,255,0.12);
   color: #fff;
@@ -326,7 +308,7 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .loginScreen button{
   width: min(92vw, 340px);
   padding: 12px 16px;
-  border-radius: 14px;
+  border-radius: 999px;
   border: 1px solid rgba(255,120,170,0.55);
   background: linear-gradient(45deg, #ff2f92, #ff77c8);
   color: #fff;

@@ -3,11 +3,12 @@
 // -------------------------------
 
 // ==== Config (edit if you like) ====
+// Credentials
 const VALID_USERNAME = "sathya";
 const VALID_PASSWORD = "love";
 
-// Optional backend for replies; leave "" to simulate only
-const REPLY_ENDPOINT = "http://13.222.180.79:8081/";
+// Save replies to local server (see server below)
+const REPLY_ENDPOINT = "http://127.0.0.1:8081/reply";
 
 // ======= DOM REFS =======
 const loginScreen = document.getElementById("loginScreen");
@@ -266,6 +267,39 @@ async function typewriteLetter(targetEl) {
   cursor.remove();
 }
 
+// ========== Arrow path (motion-path) around popup border ==========
+function setArrowOffsetPath() {
+  const popupCard = loveLetterPopup?.querySelector(".popupContent");
+  const arrow = loveLetterPopup?.querySelector(".borderArrow");
+  if (!popupCard || !arrow) return;
+
+  // Get card size and build a rounded-rect SVG path (clockwise)
+  const w = popupCard.clientWidth;
+  const h = popupCard.clientHeight;
+  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--orbit-gap')) || 10;
+  const r = 16; // corner radius for the path (matches look)
+
+  // Inset path by 'gap' so the arrow orbits just outside the border visually
+  const x0 = gap, y0 = gap, x1 = w - gap, y1 = h - gap;
+
+  // Rounded rectangle path string
+  const path = [
+    `M ${x0 + r} ${y0}`,
+    `H ${x1 - r}`,
+    `A ${r} ${r} 0 0 1 ${x1} ${y0 + r}`,
+    `V ${y1 - r}`,
+    `A ${r} ${r} 0 0 1 ${x1 - r} ${y1}`,
+    `H ${x0 + r}`,
+    `A ${r} ${r} 0 0 1 ${x0} ${y1 - r}`,
+    `V ${y0 + r}`,
+    `A ${r} ${r} 0 0 1 ${x0 + r} ${y0}`,
+    `Z`
+  ].join(' ');
+
+  // Apply CSS offset-path
+  arrow.style.offsetPath = `path("${path}")`;
+}
+
 // ========== Love Theme Popup Flow ==========
 function showMailIcon() {
   openLoveLetter();
@@ -275,7 +309,6 @@ function sprinkleOverlayHearts() {
   const overlay = document.querySelector("#loveLetterPopup .loveOverlayHearts");
   if (!overlay) return;
 
-  // Clear before adding
   overlay.innerHTML = "";
 
   const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -285,7 +318,7 @@ function sprinkleOverlayHearts() {
     const h = document.createElement("div");
     h.className = "loveHeart";
     h.style.left = Math.random() * 100 + "vw";
-    h.style.top  = (60 + Math.random() * 30) + "vh"; // lower half to float up
+    h.style.top  = (60 + Math.random() * 30) + "vh";
     h.style.animationDelay = (Math.random() * 3).toFixed(2) + "s";
     overlay.appendChild(h);
     setTimeout(() => h.remove(), 7000);
@@ -298,6 +331,10 @@ function openLoveLetter() {
   typewriteLetter(loveLetterContainer);
   startPetals(20);
   sprinkleOverlayHearts();
+
+  // compute motion-path after card becomes visible
+  setTimeout(() => setArrowOffsetPath(), 50);
+  window.addEventListener('resize', setArrowOffsetPath, { passive: true });
 }
 
 function openReplyPopup() {
@@ -319,28 +356,26 @@ async function sendReply() {
   }
 
   sendReplyBtn.disabled = true;
-  replyStatus.textContent = "Sending…";
+  replyStatus.textContent = "Saving…";
 
   try {
-    if (REPLY_ENDPOINT) {
-      const res = await fetch(REPLY_ENDPOINT, {
-        method: "POST",
-        headers: {
-          "Content-Type": "text/plain",
-          "X-From": "Sathya"
-        },
-        body: msg
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      replyStatus.textContent = "Sent! 💌";
-      showToast("Reply sent successfully!");
-    } else {
-      await new Promise((r) => setTimeout(r, 600));
-      replyStatus.textContent = "Sent! 💌 (simulation)";
-      showToast("Reply sent (no backend)");
-    }
+    // Always save to local server (no email)
+    const res = await fetch(REPLY_ENDPOINT, {
+      method: "POST",
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "X-From": "Sathya"
+      },
+      body: msg
+    });
+
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+    replyStatus.textContent = "Saved on server 💾";
+    showToast("Reply saved!");
   } catch (e) {
-    replyStatus.textContent = "Failed to send. Please try again.";
+    console.error(e);
+    replyStatus.textContent = "Failed to save. Please try again.";
   } finally {
     sendReplyBtn.disabled = false;
   }
@@ -358,7 +393,7 @@ window.addEventListener("DOMContentLoaded", () => {
   showLogin(false);
   startBubbles();
 
-  // --- Enhancements: autofocus + Enter key to submit ---
+  // Autofocus + Enter-to-submit for login
   const u = document.getElementById('username');
   const p = document.getElementById('password');
   if (u) u.focus();
@@ -372,3 +407,4 @@ window.addEventListener("DOMContentLoaded", () => {
   if (u) u.addEventListener('keydown', submitOnEnter);
   if (p) p.addEventListener('keydown', submitOnEnter);
 });
+
