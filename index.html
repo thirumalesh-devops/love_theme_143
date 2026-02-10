@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>For You...!</title>
+  <title>For Sathya 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css?v=4" />
+  <link rel="stylesheet" href="style.css?v=5" />
 </head>
 <body>
 
@@ -17,31 +17,29 @@
   <!-- DEFAULT LOVE BUBBLES (hidden during night scene) -->
   <div class="bubbles"></div>
 
-  <!-- NIGHT SKY OVERLAY (shown when the letter is open) -->
+  <!-- NIGHT SKY -->
   <div class="nightSky" id="nightSky" aria-hidden="true">
     <div class="moon" aria-hidden="true"></div>
-    <!-- Stars, shooting stars & petals are injected by JS -->
     <div class="plane" aria-hidden="true"></div>
   </div>
 
   <!-- GLOBAL BACK BUTTON -->
   <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
 
-  <!-- ===== LOGIN (CENTERED, NO RECTANGLE) ===== -->
+  <!-- LOGIN (centered, no rectangle) -->
   <div class="loginScreen" id="loginScreen">
     <h1>Welcome SaThya</h1>
     <p>Login to see your surprise</p>
 
     <input type="text" id="username" placeholder="Username" />
     <input type="password" id="password" placeholder="Password" />
-
     <button onclick="login()">Login</button>
 
     <p id="loginWait" class="wait"></p>
     <p id="loginError" class="error"></p>
   </div>
 
-  <!-- ===== HOME ===== -->
+  <!-- HOME (centered) -->
   <div class="home" id="homeScreen" style="display:none;">
     <h2 class="welcome">A message from my heart 💖</h2>
     <h1 class="name">SATHYA</h1>
@@ -50,9 +48,14 @@
     <div class="buttons">
       <button class="yes" onclick="showMailIcon()">YES 💌</button>
     </div>
+
+    <!-- NEW: Admin tiny toolbar -->
+    <div class="adminBar">
+      <button class="adminBtn" onclick="openAdmin()">Admin ▸ Replies</button>
+    </div>
   </div>
 
-  <!-- Optional mail popup (kept) -->
+  <!-- (Optional) MAIL ICON POPUP — kept -->
   <div class="popup" id="mailIconPopup">
     <div class="popupContent">
       <h2>💌 You have a mail!</h2>
@@ -61,7 +64,7 @@
     </div>
   </div>
 
-  <!-- Legacy transparent letter popup (kept) -->
+  <!-- LEGACY: TRANSPARENT LETTER POPUP (kept) -->
   <div class="popup transparentOverlay" id="letterPopup" style="display:none;">
     <div class="popupContent letterPanel">
       <h2 class="letterTitle">Love Letter....!</h2>
@@ -71,17 +74,15 @@
     </div>
   </div>
 
-  <!-- Love-themed letter popup -->
+  <!-- LOVE THEME LETTER POPUP -->
   <div class="popup" id="loveLetterPopup" style="display:none;">
     <div class="loveOverlayHearts"></div>
     <div class="popupContent">
       <div class="borderArrow" aria-hidden="true"></div>
-
       <div class="loveHeader">
         <div class="heartBadge" aria-hidden="true"></div>
         <div class="titleText">A Letter from My Heart</div>
       </div>
-
       <div class="loveBody">
         <div id="loveLetterContainer"></div>
         <div class="replyWrap"><button class="replyBtn" onclick="openReplyPopup()">Reply 💬</button></div>
@@ -90,7 +91,7 @@
     </div>
   </div>
 
-  <!-- Reply popup (saves to server) -->
+  <!-- REPLY POPUP (saves to server) -->
   <div class="popup transparentOverlay" id="replyPopup" style="display:none;">
     <div class="popupContent replyPanel">
       <h2 class="letterTitle">Send your reply</h2>
@@ -104,10 +105,33 @@
     </div>
   </div>
 
-  <!-- Toast -->
+  <!-- NEW: ADMIN POPUP -->
+  <div class="popup transparentOverlay" id="adminPopup" style="display:none;">
+    <div class="popupContent adminPanel">
+      <h2>Admin · Replies</h2>
+      <p class="adminHint">View latest replies, download all, or clear the file.</p>
+
+      <div class="adminActions">
+        <button class="adminBtn small" onclick="refreshReplies()">Refresh</button>
+        <button class="adminBtn small" onclick="downloadReplies()">Download</button>
+        <button class="adminBtn small danger" onclick="clearReplies()">Clear</button>
+      </div>
+
+      <div class="adminListWrap">
+        <pre id="adminReplies" class="adminList">(loading…)</pre>
+      </div>
+
+      <div class="midBackWrap">
+        <button class="midBack" onclick="closeAdmin()">Close</button>
+      </div>
+      <p id="adminStatus" class="replyStatus" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- Toast notifications -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script -->
-  <script src="script.js?v=4"></script>
+  <script src="script.js?v=5"></script>
 </body>
 </html>

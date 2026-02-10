@@ -300,3 +300,29 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   }
   .moon { animation: none !important; }
 }
+
+/* ===== ADMIN POPUP (inherits popup styles) ===== */
+.adminPanel h2 { margin-bottom: 6px; }
+.adminPanel .adminHint { color: #f0f0f0; opacity: .9; margin-bottom: 10px; }
+
+.adminActions { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.adminBtn.small {
+  padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35);
+  background: #2a2a2a; color: #fff; cursor: pointer; font-size: 0.95rem;
+}
+.adminBtn.small:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.18); }
+.adminBtn.small.danger { background: #5c1f2b; border-color: rgba(255,180,180,0.5); }
+
+.adminListWrap { max-height: 360px; overflow: auto; border: 1px solid rgba(255,255,255,0.25); border-radius: 10px; }
+.adminList {
+  white-space: pre-wrap; color: #fff; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  padding: 10px; margin: 0; background: rgba(0,0,0,0.25); border-radius: 10px;
+}
+
+/* Tiny toolbar on Home */
+.adminBar { margin-top: 14px; }
+.adminBar .adminBtn {
+  padding: 8px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.35); color: #fff; cursor: pointer; font-size: 0.95rem;
+}
+.adminBar .adminBtn:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.18); }

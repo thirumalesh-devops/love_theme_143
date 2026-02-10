@@ -7,17 +7,22 @@
 const VALID_USERNAME = "sathya";
 const VALID_PASSWORD = "love";
 
-// Save replies to local Flask server (Option A)
-const REPLY_ENDPOINT = `${location.protocol}//${location.hostname}:8082/reply`;
+// Reply saver endpoint – you verified backend is on 8082
+const BASE_HOST = `${location.protocol}//${location.hostname}`;
+const REPLY_ENDPOINT = `${BASE_HOST}:8082/reply`;
+const REPLIES_ENDPOINT = `${BASE_HOST}:8082/replies`; // GET (view), /download (file), POST /clear
 
 // ======= DOM REFS =======
 const loginScreen = document.getElementById("loginScreen");
 const homeScreen = document.getElementById("homeScreen");
-const mailIconPopup = document.getElementById("mailIconPopup"); // kept
+const mailIconPopup = document.getElementById("mailIconPopup");
 const letterPopup = document.getElementById("letterPopup");
 const loveLetterPopup = document.getElementById("loveLetterPopup");
 const loveLetterContainer = document.getElementById("loveLetterContainer");
 const replyPopup = document.getElementById("replyPopup");
+const adminPopup = document.getElementById("adminPopup");
+const adminReplies = document.getElementById("adminReplies");
+const adminStatus = document.getElementById("adminStatus");
 const nightSky = document.getElementById("nightSky");
 const globalBackBtn = document.getElementById("globalBack");
 const toastEl = document.getElementById("toast");
@@ -56,17 +61,16 @@ async function login() {
   const wait = document.getElementById("loginWait");
   const err = document.getElementById("loginError");
   wait.textContent = "Checking…"; err.textContent = "";
-  await new Promise((r) => setTimeout(r, 600));
-  if (u === VALID_USERNAME && p === VALID_PASSWORD) {
-    wait.textContent = "Welcome ❤️"; showHome(); startMusic();
-  } else { wait.textContent = ""; err.textContent = "Invalid username or password. Try again."; }
+  await new Promise((r) => setTimeout(r, 300));
+  if (u === VALID_USERNAME && p === VALID_PASSWORD) { wait.textContent = "Welcome ❤️"; showHome(); startMusic(); }
+  else { wait.textContent = ""; err.textContent = "Invalid username or password. Try again."; }
 }
 
 // Nav helpers
 function updateBackButtonVisibility(){ globalBackBtn.hidden = navStack.length === 0; }
 function navBack(){
   const prev = navStack.pop();
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   if (prev === "home") showHome(false); else showLogin(false);
   updateBackButtonVisibility();
@@ -74,14 +78,14 @@ function navBack(){
 function showLogin(push = true){
   if (push) navStack.length = 0;
   loginScreen.style.display = "flex"; homeScreen.style.display = "none";
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   updateBackButtonVisibility();
 }
 function showHome(push = true){
   if (push) navStack.push("home");
   loginScreen.style.display = "none"; homeScreen.style.display = "flex";
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   updateBackButtonVisibility();
 }
@@ -112,20 +116,21 @@ const letterLines = [
 async function typewriteLetter(targetEl){
   targetEl.innerHTML=""; const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent=" "; const p=document.createElement("div"); targetEl.appendChild(p); targetEl.appendChild(cursor);
   const delay=(ms)=>new Promise((r)=>setTimeout(r,ms)); const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  for (let i=0;i<letterLines.length;i++){ const line=letterLines[i]; if (line.length===0){ p.appendChild(document.createElement("br")); await delay(reduced?30:120); continue; }
+  for (let i=0;i<letterLines.length;i++){ const line=letterLines[i];
+    if (!line){ p.appendChild(document.createElement("br")); await delay(reduced?30:120); continue; }
     for (let c=0;c<line.length;c++){ p.append(line[c]); await delay(reduced?4:30); }
     p.appendChild(document.createElement("br")); await delay(reduced?40:180);
   } cursor.remove();
 }
 
-// Arrow motion path around card
+// Motion-path arrow
 function setArrowOffsetPath(){
   const card = loveLetterPopup?.querySelector(".popupContent");
   const arrow = loveLetterPopup?.querySelector(".borderArrow");
   if (!card || !arrow) return;
-  const w = card.clientWidth, h = card.clientHeight;
-  const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--orbit-gap')) || 10;
-  const r = 16; const x0=gap, y0=gap, x1=w-gap, y1=h-gap;
+  const w=card.clientWidth, h=card.clientHeight;
+  const gap=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--orbit-gap'))||10;
+  const r=16, x0=gap, y0=gap, x1=w-gap, y1=h-gap;
   const path = [
     `M ${x0 + r} ${y0}`, `H ${x1 - r}`, `A ${r} ${r} 0 0 1 ${x1} ${y0 + r}`,
     `V ${y1 - r}`, `A ${r} ${r} 0 0 1 ${x1 - r} ${y1}`,
@@ -135,7 +140,7 @@ function setArrowOffsetPath(){
   arrow.style.offsetPath = `path("${path}")`;
 }
 
-// Love popup flow
+// Letter popup flow
 function showMailIcon(){ openLoveLetter(); }
 function sprinkleOverlayHearts(){
   const overlay=document.querySelector("#loveLetterPopup .loveOverlayHearts"); if (!overlay) return;
@@ -147,50 +152,81 @@ function openLoveLetter(){
   setTimeout(()=>setArrowOffsetPath(), 50); window.addEventListener('resize', setArrowOffsetPath, { passive:true });
 }
 
-// Reply
-function openReplyPopup(){ replyText.value=""; replyStatus.textContent=""; openPopup(replyPopup); }
-function closeReplyPopup(silent=false){ closePopup(replyPopup); if (!silent) showToast("Reply closed"); }
-async function sendReply() {
-  const msg = (document.getElementById("replyText").value || "").trim();
-  if (!msg) {
-    replyStatus.textContent = "Please write a message before sending.";
-    return;
-  }
-
-  sendReplyBtn.disabled = true;
-  replyStatus.textContent = "Saving…";
-
-  try {
-    // Make it a "simple request": POST + text/plain + NO custom headers => no CORS preflight
+// Reply save – NO preflight (no custom headers)
+async function sendReply(){
+  const msg = (replyText.value || "").trim();
+  if (!msg){ replyStatus.textContent = "Please write a message before sending."; return; }
+  sendReplyBtn.disabled = true; replyStatus.textContent = "Saving…";
+  try{
     const payload = `FROM: Sathya\n\n${msg}\n`;
     const res = await fetch(REPLY_ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "text/plain; charset=utf-8" },
       body: payload
     });
+    if (!res.ok) { const text = await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${text}`); }
+    replyStatus.textContent = "Saved on server 💾"; showToast("Reply saved!");
+  }catch(e){ console.error("Reply save failed:", e); replyStatus.textContent = "Failed to save. Please try again."; }
+  finally{ sendReplyBtn.disabled = false; }
+}
 
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      throw new Error(`HTTP ${res.status} ${text}`);
-    }
+// ===== ADMIN =====
+function openAdmin(){
+  adminReplies.textContent = "(loading…)";
+  adminStatus.textContent = "";
+  openPopup(adminPopup);
+  refreshReplies();
+}
+function closeAdmin(silent=false){ closePopup(adminPopup); if (!silent) showToast("Admin closed"); }
 
-    replyStatus.textContent = "Saved on server 💾";
-    showToast("Reply saved!");
-  } catch (e) {
-    console.error("Reply save failed:", e);
-    replyStatus.textContent = "Failed to save. Please try again.";
-  } finally {
-    sendReplyBtn.disabled = false;
+/** Fetch latest replies (server-side limit 100 for quick view) */
+async function refreshReplies(){
+  adminStatus.textContent = "Loading…";
+  try{
+    const res = await fetch(`${REPLIES_ENDPOINT}?limit=100`, { method: "GET" });
+    if (!res.ok) { const text=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${text}`); }
+    const txt = await res.text();
+    adminReplies.textContent = txt || "(no replies yet)";
+    adminStatus.textContent = "Loaded";
+  }catch(e){
+    console.error("refreshReplies error:", e);
+    adminStatus.textContent = "Failed to load replies.";
+    adminReplies.textContent = "(error)";
+  }
+}
+
+/** Download full replies file */
+function downloadReplies(){
+  // simple navigation (lets browser handle download)
+  window.open(`${REPLIES_ENDPOINT}/download`, "_blank");
+}
+
+/** Clear the file (asks first) */
+async function clearReplies(){
+  if (!confirm("Are you sure you want to clear all replies?")) return;
+  adminStatus.textContent = "Clearing…";
+  try{
+    const res = await fetch(`${REPLIES_ENDPOINT}/clear`, { method: "POST" });
+    if (!res.ok) { const text=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${text}`); }
+    adminStatus.textContent = "Cleared.";
+    adminReplies.textContent = "(no replies yet)";
+  }catch(e){
+    console.error("clearReplies error:", e);
+    adminStatus.textContent = "Failed to clear.";
   }
 }
 
 // Expose
 window.login=login; window.navBack=navBack; window.showMailIcon=showMailIcon;
-window.openReplyPopup=openReplyPopup; window.closeReplyPopup=closeReplyPopup; window.sendReply=sendReply;
+window.openReplyPopup=()=>{ replyText.value=""; replyStatus.textContent=""; openPopup(replyPopup); };
+window.closeReplyPopup=(s=false)=>{ closePopup(replyPopup); if (!s) showToast("Reply closed"); };
+window.sendReply=sendReply;
+window.openAdmin=openAdmin; window.closeAdmin=closeAdmin; window.refreshReplies=refreshReplies;
+window.downloadReplies=downloadReplies; window.clearReplies=clearReplies;
 
+// Init
 window.addEventListener("DOMContentLoaded", ()=>{
   showLogin(false); startBubbles();
-  // Autofocus + Enter submit
   const u=document.getElementById('username'), p=document.getElementById('password');
   if (u) u.focus();
   const submitOnEnter=(e)=>{ if (e.key==='Enter'){ e.preventDefault(); login(); } };
