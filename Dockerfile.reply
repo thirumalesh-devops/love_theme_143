@@ -7,5 +7,5 @@ RUN pip install --no-cache-dir flask
 # Copy only the server file
 COPY server.py /app/server.py
 
-EXPOSE 8081
+EXPOSE 8082
 CMD ["python", "server.py"]

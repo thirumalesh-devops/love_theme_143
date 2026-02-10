@@ -8,7 +8,7 @@ const VALID_USERNAME = "sathya";
 const VALID_PASSWORD = "love";
 
 // Save replies to local Flask server (Option A)
-const REPLY_ENDPOINT = `${location.protocol}//${location.hostname}:8081/reply`;
+const REPLY_ENDPOINT = `${location.protocol}//${location.hostname}:8082/reply`;
 
 // ======= DOM REFS =======
 const loginScreen = document.getElementById("loginScreen");
