@@ -27,42 +27,41 @@
   <!-- GLOBAL BACK BUTTON (on every page except first) -->
   <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
 
-  <!-- LOGIN SCREEN (redesigned) -->
+  <!-- ===== LOGIN SCREEN (redesigned card) ===== -->
   <section class="loginScreen" id="loginScreen" aria-label="Login">
+    <!-- ambient hearts behind card -->
+    <div class="loginHearts" aria-hidden="true">
+      <span class="h1"></span><span class="h2"></span><span class="h3"></span>
+      <span class="h4"></span><span class="h5"></span>
+    </div>
+
     <div class="loginCard" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
       <div class="loginHeader">
-        <div class="loginHeart" aria-hidden="true">💗</div>
+        <div class="badge">💗</div>
         <h1 id="loginTitle">Welcome, SaThya</h1>
-        <p class="loginSubtitle">Login to see your surprise</p>
+        <p>Login to see your surprise</p>
       </div>
 
-      <form class="loginBody" onsubmit="return false" autocomplete="off">
-        <label class="loginLabel" for="username">Username</label>
-        <div class="inputWrap">
-          <input type="text" id="username" name="username" placeholder="Enter username" inputmode="text" autocapitalize="none" autocomplete="username" required />
+      <div class="loginBody">
+        <div class="field">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
         </div>
 
-        <label class="loginLabel" for="password">Password</label>
-        <div class="inputWrap withToggle">
-          <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required />
-          <button type="button" class="togglePwd" aria-label="Show password" onclick="togglePassword()">👁️</button>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
         </div>
 
-        <button class="loginBtn" id="loginBtn" onclick="login()">Login</button>
+        <button class="loginBtn" onclick="login()">Login</button>
 
         <p id="loginWait" class="wait" aria-live="polite"></p>
         <p id="loginError" class="error" aria-live="assertive"></p>
-
-        <div class="loginHelp">
-          <button type="button" class="miniBtn" onclick="prefillDemo()">Fill Demo</button>
-          <span class="sep">•</span>
-          <button type="button" class="miniBtn" onclick="startMusic()">Enable Music 🎵</button>
-        </div>
-      </form>
+      </div>
     </div>
   </section>
 
-  <!-- HOME SCREEN -->
+  <!-- ===== HOME SCREEN ===== -->
   <div class="home" id="homeScreen" style="display:none;">
     <h2 class="welcome">A message from my heart 💖</h2>
     <h1 class="name">SATHYA</h1>
@@ -146,7 +145,6 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script at end -->
-  <script src="script.js?v=987654325"></script>
+  <script src="script.js?v=987654324"></script>
 </body>
 </html>
-``
