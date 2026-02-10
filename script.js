@@ -357,4 +357,18 @@ window.sendReply = sendReply;
 window.addEventListener("DOMContentLoaded", () => {
   showLogin(false);
   startBubbles();
+
+  // --- Enhancements: autofocus + Enter key to submit ---
+  const u = document.getElementById('username');
+  const p = document.getElementById('password');
+  if (u) u.focus();
+
+  const submitOnEnter = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      login();
+    }
+  };
+  if (u) u.addEventListener('keydown', submitOnEnter);
+  if (p) p.addEventListener('keydown', submitOnEnter);
 });

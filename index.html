@@ -5,7 +5,7 @@
   <title>For Sathya 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=2" />
 </head>
 <body>
 
@@ -27,39 +27,19 @@
   <!-- GLOBAL BACK BUTTON (on every page except first) -->
   <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
 
-  <!-- ===== LOGIN SCREEN (redesigned card) ===== -->
-  <section class="loginScreen" id="loginScreen" aria-label="Login">
-    <!-- ambient hearts behind card -->
-    <div class="loginHearts" aria-hidden="true">
-      <span class="h1"></span><span class="h2"></span><span class="h3"></span>
-      <span class="h4"></span><span class="h5"></span>
-    </div>
+  <!-- ===== LOGIN SCREEN (centered) ===== -->
+  <div class="loginScreen" id="loginScreen">
+    <h1>Welcome SaThya </h1>
+    <p>Login to see your surprise</p>
 
-    <div class="loginCard" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
-      <div class="loginHeader">
-        <div class="badge">💗</div>
-        <h1 id="loginTitle">Welcome, SaThya</h1>
-        <p>Login to see your surprise</p>
-      </div>
+    <input type="text" id="username" placeholder="Username" />
+    <input type="password" id="password" placeholder="Password" />
 
-      <div class="loginBody">
-        <div class="field">
-          <label for="username">Username</label>
-          <input type="text" id="username" placeholder="Enter username" autocomplete="username" />
-        </div>
+    <button onclick="login()">Login</button>
 
-        <div class="field">
-          <label for="password">Password</label>
-          <input type="password" id="password" placeholder="Enter password" autocomplete="current-password" />
-        </div>
-
-        <button class="loginBtn" onclick="login()">Login</button>
-
-        <p id="loginWait" class="wait" aria-live="polite"></p>
-        <p id="loginError" class="error" aria-live="assertive"></p>
-      </div>
-    </div>
-  </section>
+    <p id="loginWait" class="wait"></p>
+    <p id="loginError" class="error"></p>
+  </div>
 
   <!-- ===== HOME SCREEN ===== -->
   <div class="home" id="homeScreen" style="display:none;">
@@ -145,6 +125,6 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script at end -->
-  <script src="script.js?v=987654324"></script>
+  <script src="script.js?v=3"></script>
 </body>
 </html>
