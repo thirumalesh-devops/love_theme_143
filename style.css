@@ -1,11 +1,11 @@
 /* ====== TUNABLE SETTINGS ====== */
 :root {
   --letter-max-width: 1100px;
-  --letter-width-percent: 100%;
+  --letter-width-percent: 96%;
 
   --letter-title-size: 1.5rem;
-  --letter-body-size: 1.04rem;
-  --letter-line-height: 1.82;
+  --letter-body-size: 1.02rem;
+  --letter-line-height: 1.45;
 
   --letter-padding: 28px;
   --letter-radius: 22px;
