@@ -50,7 +50,7 @@ body {
 }
 .globalBack:hover { border-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.25); }
 
-/* Hide bubbles during night scene */
+/* Hide bubbles at night */
 body.night .bubbles { display: none; }
 
 /* ===== NIGHT SKY ===== */
@@ -198,7 +198,7 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .midBackWrap{display:flex; justify-content:center; margin-top:var(--midback-margin-top)}
 .replyWrap{display:flex; justify-content:center; margin-top:16px}
 
-/* Floating hearts overlay (subtle) */
+/* Floating hearts overlay */
 .loveOverlayHearts { position:absolute; inset:0; pointer-events:none; z-index:1 }
 .loveHeart {
   position:absolute; width:14px; height:14px;
@@ -271,7 +271,6 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   min-height: 100vh; width: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 10px; padding: 20px; position: relative; z-index: 1;
-  /* no container/card */
 }
 .loginScreen h1{
   font-size: 2.4rem; letter-spacing: 0.5px; color: #fff;
@@ -293,19 +292,25 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .loginScreen .wait{ margin-top:6px; color:#ffd1e8; font-style:italic }
 .loginScreen .error{ margin-top:6px; color:#ff5b7f; font-weight:700 }
 
-/* ===== Accessibility: Reduce Motion ===== */
-@media (prefers-reduced-motion: reduce) {
-  .plane, .shootingStar, .petal, .bubble, .loveHeart, .borderArrow {
-    animation-duration: 0.001s !important; animation-iteration-count: 1 !important;
-  }
-  .moon { animation: none !important; }
+/* ===== ADMIN LOGIN POPUP ===== */
+.adminLoginPanel {
+  width: min(92vw, 480px); max-width:480px; padding:22px; border-radius:16px;
+  background: rgba(0,0,0,0.35); border: 2px solid rgba(255,255,255,0.9);
+  color:#fff; box-shadow:none; backdrop-filter: blur(2px);
 }
+.field{ display:flex; flex-direction:column; gap:6px; margin:8px 0; }
+.field label{ font-size:.95rem; color:#f5d7e6 }
+.field input{
+  padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.35);
+  background: rgba(0,0,0,0.2); color:#fff; outline:none;
+}
+.field input::placeholder{ color:rgba(255,255,255,0.7) }
 
 /* ===== ADMIN POPUP (inherits popup styles) ===== */
 .adminPanel h2 { margin-bottom: 6px; }
 .adminPanel .adminHint { color: #f0f0f0; opacity: .9; margin-bottom: 10px; }
 
-.adminActions { display: flex; gap: 8px; justify-content: center; margin-bottom: 10px; }
+.adminActions { display: flex; gap: 8px; justify-content: center; margin: 10px 0; }
 .adminBtn.small {
   padding: 8px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.35);
   background: #2a2a2a; color: #fff; cursor: pointer; font-size: 0.95rem;
@@ -326,3 +331,11 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
   background: rgba(0,0,0,0.35); color: #fff; cursor: pointer; font-size: 0.95rem;
 }
 .adminBar .adminBtn:hover { box-shadow: 0 4px 10px rgba(0,0,0,0.18); }
+
+/* ===== Accessibility: Reduce Motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  .plane, .shootingStar, .petal, .bubble, .loveHeart, .borderArrow {
+    animation-duration: 0.001s !important; animation-iteration-count: 1 !important;
+  }
+  .moon { animation: none !important; }
+}

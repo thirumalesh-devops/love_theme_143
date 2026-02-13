@@ -3,33 +3,39 @@
 // -------------------------------
 
 // ==== Config ====
-// Credentials
+// User creds (view site content)
 const VALID_USERNAME = "sathya";
 const VALID_PASSWORD = "love";
 
-// Reply saver endpoint – you verified backend is on 8082
+// Backend base (Flask on 8082)
 const BASE_HOST = `${location.protocol}//${location.hostname}`;
-const REPLY_ENDPOINT = `${BASE_HOST}:8082/reply`;
+const REPLY_ENDPOINT   = `${BASE_HOST}:8082/reply`;
 const REPLIES_ENDPOINT = `${BASE_HOST}:8082/replies`; // GET (view), /download (file), POST /clear
 
 // ======= DOM REFS =======
-const loginScreen = document.getElementById("loginScreen");
-const homeScreen = document.getElementById("homeScreen");
-const mailIconPopup = document.getElementById("mailIconPopup");
-const letterPopup = document.getElementById("letterPopup");
-const loveLetterPopup = document.getElementById("loveLetterPopup");
+const loginScreen      = document.getElementById("loginScreen");
+const homeScreen       = document.getElementById("homeScreen");
+const mailIconPopup    = document.getElementById("mailIconPopup");
+const letterPopup      = document.getElementById("letterPopup");
+const loveLetterPopup  = document.getElementById("loveLetterPopup");
 const loveLetterContainer = document.getElementById("loveLetterContainer");
-const replyPopup = document.getElementById("replyPopup");
-const adminPopup = document.getElementById("adminPopup");
-const adminReplies = document.getElementById("adminReplies");
-const adminStatus = document.getElementById("adminStatus");
-const nightSky = document.getElementById("nightSky");
-const globalBackBtn = document.getElementById("globalBack");
-const toastEl = document.getElementById("toast");
-const replyText = document.getElementById("replyText");
-const replyStatus = document.getElementById("replyStatus");
-const sendReplyBtn = document.getElementById("sendReplyBtn");
-const bgMusic = document.getElementById("bgMusic");
+const replyPopup       = document.getElementById("replyPopup");
+const adminLoginPopup  = document.getElementById("adminLoginPopup");
+const adminPopup       = document.getElementById("adminPopup");
+
+const adminReplies     = document.getElementById("adminReplies");
+const adminStatus      = document.getElementById("adminStatus");
+const nightSky         = document.getElementById("nightSky");
+const globalBackBtn    = document.getElementById("globalBack");
+const toastEl          = document.getElementById("toast");
+
+const replyText        = document.getElementById("replyText");
+const replyStatus      = document.getElementById("replyStatus");
+const sendReplyBtn     = document.getElementById("sendReplyBtn");
+const bgMusic          = document.getElementById("bgMusic");
+
+// In-memory admin auth token (HTTP Basic)
+let adminAuthToken = null; // e.g., "Basic xxxxxxxxx"
 
 // Navigation stack
 const navStack = [];
@@ -59,7 +65,7 @@ async function login() {
   const u = (document.getElementById("username").value || "").trim().toLowerCase();
   const p = (document.getElementById("password").value || "").trim();
   const wait = document.getElementById("loginWait");
-  const err = document.getElementById("loginError");
+  const err  = document.getElementById("loginError");
   wait.textContent = "Checking…"; err.textContent = "";
   await new Promise((r) => setTimeout(r, 300));
   if (u === VALID_USERNAME && p === VALID_PASSWORD) { wait.textContent = "Welcome ❤️"; showHome(); startMusic(); }
@@ -70,7 +76,8 @@ async function login() {
 function updateBackButtonVisibility(){ globalBackBtn.hidden = navStack.length === 0; }
 function navBack(){
   const prev = navStack.pop();
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup);
+  closeReplyPopup(true); closeAdmin(true); closeAdminLogin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   if (prev === "home") showHome(false); else showLogin(false);
   updateBackButtonVisibility();
@@ -78,14 +85,16 @@ function navBack(){
 function showLogin(push = true){
   if (push) navStack.length = 0;
   loginScreen.style.display = "flex"; homeScreen.style.display = "none";
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup);
+  closeReplyPopup(true); closeAdmin(true); closeAdminLogin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   updateBackButtonVisibility();
 }
 function showHome(push = true){
   if (push) navStack.push("home");
   loginScreen.style.display = "none"; homeScreen.style.display = "flex";
-  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup); closeReplyPopup(true); closeAdmin(true);
+  closePopup(letterPopup); closePopup(loveLetterPopup); closePopup(mailIconPopup);
+  closeReplyPopup(true); closeAdmin(true); closeAdminLogin(true);
   document.body.classList.remove("night"); nightSky.setAttribute("aria-hidden", "true");
   updateBackButtonVisibility();
 }
@@ -170,21 +179,81 @@ async function sendReply(){
   finally{ sendReplyBtn.disabled = false; }
 }
 
-// ===== ADMIN =====
+/* ===================== ADMIN ===================== */
+/** Open Admin – if not authenticated, show Admin Login popup */
 function openAdmin(){
-  adminReplies.textContent = "(loading…)";
-  adminStatus.textContent = "";
-  openPopup(adminPopup);
-  refreshReplies();
+  if (!adminAuthToken) {
+    // show login popup
+    document.getElementById("adminUser").value = "";
+    document.getElementById("adminPass").value = "";
+    document.getElementById("adminLoginStatus").textContent = "";
+    openPopup(adminLoginPopup);
+  } else {
+    // already authed
+    adminReplies.textContent = "(loading…)";
+    adminStatus.textContent = "";
+    openPopup(adminPopup);
+    refreshReplies();
+  }
 }
 function closeAdmin(silent=false){ closePopup(adminPopup); if (!silent) showToast("Admin closed"); }
+function closeAdminLogin(silent=false){ closePopup(adminLoginPopup); if (!silent) showToast("Admin login closed"); }
 
-/** Fetch latest replies (server-side limit 100 for quick view) */
+function buildAdminAuth(user, pass){
+  return "Basic " + btoa(`${user}:${pass}`);
+}
+
+/** Try admin login by calling /replies?limit=1 with Authorization */
+async function adminLogin(){
+  const user = (document.getElementById("adminUser").value || "").trim();
+  const pass = (document.getElementById("adminPass").value || "").trim();
+  const status = document.getElementById("adminLoginStatus");
+
+  if (!user || !pass){
+    status.textContent = "Please enter admin username and password.";
+    return;
+  }
+
+  const token = buildAdminAuth(user, pass);
+  status.textContent = "Authenticating…";
+  try{
+    const res = await fetch(`${REPLIES_ENDPOINT}?limit=1`, {
+      method: "GET",
+      headers: { "Authorization": token }
+    });
+    if (res.status === 401) { status.textContent = "Invalid admin credentials."; return; }
+    if (!res.ok) {
+      const text = await res.text().catch(()=> "");
+      throw new Error(`HTTP ${res.status} ${text}`);
+    }
+    // ok -> store token and open admin view
+    adminAuthToken = token;
+    status.textContent = "Authenticated.";
+    closeAdminLogin(true);
+    adminReplies.textContent = "(loading…)";
+    adminStatus.textContent = "";
+    openPopup(adminPopup);
+    refreshReplies();
+  }catch(e){
+    console.error("adminLogin error:", e);
+    status.textContent = "Login failed. Try again.";
+  }
+}
+
+// Helper for fetch with admin Authorization header
+async function adminFetch(url, options = {}){
+  const headers = Object.assign({}, options.headers || {});
+  headers["Authorization"] = adminAuthToken || "";
+  return fetch(url, Object.assign({}, options, { headers }));
+}
+
+// Load replies (last 100)
 async function refreshReplies(){
   adminStatus.textContent = "Loading…";
   try{
-    const res = await fetch(`${REPLIES_ENDPOINT}?limit=100`, { method: "GET" });
-    if (!res.ok) { const text=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${text}`); }
+    const res = await adminFetch(`${REPLIES_ENDPOINT}?limit=100`, { method: "GET" });
+    if (res.status === 401) { adminStatus.textContent = "Unauthorized. Please login as admin again."; adminReplies.textContent = "(unauthorized)"; adminAuthToken = null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
     const txt = await res.text();
     adminReplies.textContent = txt || "(no replies yet)";
     adminStatus.textContent = "Loaded";
@@ -195,19 +264,32 @@ async function refreshReplies(){
   }
 }
 
-/** Download full replies file */
-function downloadReplies(){
-  // simple navigation (lets browser handle download)
-  window.open(`${REPLIES_ENDPOINT}/download`, "_blank");
+// Download replies with Authorization (create Blob)
+async function downloadReplies(){
+  try{
+    const res = await adminFetch(`${REPLIES_ENDPOINT}/download`, { method: "GET" });
+    if (res.status === 401) { showToast("Unauthorized. Login as admin"); adminAuthToken = null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
+    const blob = await res.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement("a");
+    a.href = url; a.download = "valentine_replies.txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  }catch(e){
+    console.error("downloadReplies error:", e);
+    showToast("Download failed");
+  }
 }
 
-/** Clear the file (asks first) */
+// Clear replies (POST) with Authorization
 async function clearReplies(){
   if (!confirm("Are you sure you want to clear all replies?")) return;
   adminStatus.textContent = "Clearing…";
   try{
-    const res = await fetch(`${REPLIES_ENDPOINT}/clear`, { method: "POST" });
-    if (!res.ok) { const text=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${text}`); }
+    const res = await adminFetch(`${REPLIES_ENDPOINT}/clear`, { method: "POST" });
+    if (res.status === 401) { adminStatus.textContent = "Unauthorized. Please login again."; adminAuthToken=null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
     adminStatus.textContent = "Cleared.";
     adminReplies.textContent = "(no replies yet)";
   }catch(e){
@@ -221,8 +303,10 @@ window.login=login; window.navBack=navBack; window.showMailIcon=showMailIcon;
 window.openReplyPopup=()=>{ replyText.value=""; replyStatus.textContent=""; openPopup(replyPopup); };
 window.closeReplyPopup=(s=false)=>{ closePopup(replyPopup); if (!s) showToast("Reply closed"); };
 window.sendReply=sendReply;
-window.openAdmin=openAdmin; window.closeAdmin=closeAdmin; window.refreshReplies=refreshReplies;
-window.downloadReplies=downloadReplies; window.clearReplies=clearReplies;
+
+window.openAdmin=openAdmin; window.closeAdmin=closeAdmin;
+window.adminLogin=adminLogin; window.closeAdminLogin=closeAdminLogin;
+window.refreshReplies=refreshReplies; window.downloadReplies=downloadReplies; window.clearReplies=clearReplies;
 
 // Init
 window.addEventListener("DOMContentLoaded", ()=>{
@@ -232,3 +316,4 @@ window.addEventListener("DOMContentLoaded", ()=>{
   const submitOnEnter=(e)=>{ if (e.key==='Enter'){ e.preventDefault(); login(); } };
   if (u) u.addEventListener('keydown', submitOnEnter); if (p) p.addEventListener('keydown', submitOnEnter);
 });
+

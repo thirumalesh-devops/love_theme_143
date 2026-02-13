@@ -5,7 +5,7 @@
   <title>For love 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css?v=5" />
+  <link rel="stylesheet" href="style.css?v=6" />
 </head>
 <body>
 
@@ -43,13 +43,13 @@
   <div class="home" id="homeScreen" style="display:none;">
     <h2 class="welcome">A message from my heart 💖</h2>
     <h1 class="name">SATHYA</h1>
-    <p class="quote">“You are the reason my heart smiles every day.”</p>
+    <p class="quote">“Every day with you is a new reason to smile.”</p>
     <p class="question">Will you be my Valentine?</p>
     <div class="buttons">
       <button class="yes" onclick="showMailIcon()">YES 💌</button>
     </div>
 
-    <!-- NEW: Admin tiny toolbar -->
+    <!-- Admin toolbar (opens admin login, only admins can proceed) -->
     <div class="adminBar">
       <button class="adminBtn" onclick="openAdmin()">Admin ▸ Replies</button>
     </div>
@@ -105,7 +105,28 @@
     </div>
   </div>
 
-  <!-- NEW: ADMIN POPUP -->
+  <!-- ADMIN LOGIN POPUP -->
+  <div class="popup transparentOverlay" id="adminLoginPopup" style="display:none;">
+    <div class="popupContent adminLoginPanel">
+      <h2>Admin Login</h2>
+      <p class="adminHint">Only admin can view replies.</p>
+      <div class="field">
+        <label for="adminUser">Username</label>
+        <input id="adminUser" type="text" placeholder="admin" />
+      </div>
+      <div class="field">
+        <label for="adminPass">Password</label>
+        <input id="adminPass" type="password" placeholder="••••••••" />
+      </div>
+      <div class="adminActions">
+        <button class="adminBtn small" onclick="adminLogin()">Login</button>
+        <button class="adminBtn small" onclick="closeAdminLogin()">Cancel</button>
+      </div>
+      <p id="adminLoginStatus" class="replyStatus" aria-live="polite"></p>
+    </div>
+  </div>
+
+  <!-- ADMIN POPUP (requires admin login) -->
   <div class="popup transparentOverlay" id="adminPopup" style="display:none;">
     <div class="popupContent adminPanel">
       <h2>Admin · Replies</h2>
@@ -128,10 +149,10 @@
     </div>
   </div>
 
-  <!-- Toast notifications -->
+  <!-- Toast -->
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script -->
-  <script src="script.js?v=5"></script>
+  <script src="script.js?v=6"></script>
 </body>
 </html>
