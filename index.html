@@ -2,19 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>For my love 💌</title>
+  <title>For love 💌</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <!-- Styles -->
-  <link rel="stylesheet" href="style.css?v=6" />
+  style.css?v=7
 </head>
 <body>
 
   <!-- BACKGROUND MUSIC -->
   <audio id="bgMusic" loop preload="auto">
-    <source src="https://my-love-proposal-assets.s3.us-east-1.amazonaws.com/WhatsApp+Audio+2026-01-11+at+7.03.05+PM.mpeg" type="audio/mpeg" />
+    https://my-love-proposal-assets.s3.us-east-1.amazonaws.com/WhatsApp+Audio+2026-01-11+at+7.03.05+PM.mpeg
   </audio>
 
-  <!-- DEFAULT LOVE BUBBLES (hidden during night scene) -->
+  <!-- LOVE BUBBLES (show on login/home, hidden at night) -->
   <div class="bubbles"></div>
 
   <!-- NIGHT SKY -->
@@ -26,36 +26,36 @@
   <!-- GLOBAL BACK BUTTON -->
   <button id="globalBack" class="globalBack" onclick="navBack()" hidden>← Back</button>
 
-  <!-- LOGIN (centered, no rectangle) -->
+  <!-- LOGIN (centered, shifted slightly upward) -->
   <div class="loginScreen" id="loginScreen">
     <h1>Welcome SaThya</h1>
     <p>Login to see your surprise</p>
 
-    <input type="text" id="username" placeholder="Username" />
-    <input type="password" id="password" placeholder="Password" />
+    <input type="text" id="username" placeholder=" " />
+    <input type="password" id="password" placeholder=" " />
     <button onclick="login()">Login</button>
 
     <p id="loginWait" class="wait"></p>
     <p id="loginError" class="error"></p>
   </div>
 
-  <!-- HOME (centered) -->
+  <!-- HOME (centered, shifted slightly upward) -->
   <div class="home" id="homeScreen" style="display:none;">
     <h2 class="welcome">A message from my heart 💖</h2>
     <h1 class="name">SATHYA</h1>
     <p class="quote">“Every day with you is a new reason to smile.”</p>
     <p class="question">Will you be my Valentine?</p>
     <div class="buttons">
-      <button class="yes" onclick="showMailIcon()">YES 💌</button>
+      <button class="yes" id="yesBtn" onclick="showMailIcon()">YES 💌</button>
     </div>
 
-    <!-- Admin toolbar (opens admin login, only admins can proceed) -->
+    <!-- Admin toolbar (opens admin login; only admins can view) -->
     <div class="adminBar">
       <button class="adminBtn" onclick="openAdmin()">Admin ▸ Replies</button>
     </div>
   </div>
 
-  <!-- (Optional) MAIL ICON POPUP — kept -->
+  <!-- Optional mail icon popup (kept) -->
   <div class="popup" id="mailIconPopup">
     <div class="popupContent">
       <h2>💌 You have a mail!</h2>
@@ -64,7 +64,7 @@
     </div>
   </div>
 
-  <!-- LEGACY: TRANSPARENT LETTER POPUP (kept) -->
+  <!-- Legacy transparent letter popup (kept) -->
   <div class="popup transparentOverlay" id="letterPopup" style="display:none;">
     <div class="popupContent letterPanel">
       <h2 class="letterTitle">Love Letter....!</h2>
@@ -79,10 +79,14 @@
     <div class="loveOverlayHearts"></div>
     <div class="popupContent">
       <div class="borderArrow" aria-hidden="true"></div>
+
       <div class="loveHeader">
         <div class="heartBadge" aria-hidden="true"></div>
         <div class="titleText">A Letter from My Heart</div>
+        <!-- NEW: floating date stamp -->
+        <div class="dateStamp" id="dateStamp" title="Today"></div>
       </div>
+
       <div class="loveBody">
         <div id="loveLetterContainer"></div>
         <div class="replyWrap"><button class="replyBtn" onclick="openReplyPopup()">Reply 💬</button></div>
@@ -91,7 +95,7 @@
     </div>
   </div>
 
-  <!-- REPLY POPUP (saves to server) -->
+  <!-- REPLY POPUP -->
   <div class="popup transparentOverlay" id="replyPopup" style="display:none;">
     <div class="popupContent replyPanel">
       <h2 class="letterTitle">Send your reply</h2>
@@ -126,7 +130,7 @@
     </div>
   </div>
 
-  <!-- ADMIN POPUP (requires admin login) -->
+  <!-- ADMIN POPUP (protected) -->
   <div class="popup transparentOverlay" id="adminPopup" style="display:none;">
     <div class="popupContent adminPanel">
       <h2>Admin · Replies</h2>
@@ -153,6 +157,6 @@
   <div id="toast" class="toast" aria-live="polite"></div>
 
   <!-- Script -->
-  <script src="script.js?v=6"></script>
+  script.js?v=7</script>
 </body>
 </html>

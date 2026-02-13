@@ -19,6 +19,7 @@ const mailIconPopup    = document.getElementById("mailIconPopup");
 const letterPopup      = document.getElementById("letterPopup");
 const loveLetterPopup  = document.getElementById("loveLetterPopup");
 const loveLetterContainer = document.getElementById("loveLetterContainer");
+const dateStamp        = document.getElementById("dateStamp");
 const replyPopup       = document.getElementById("replyPopup");
 const adminLoginPopup  = document.getElementById("adminLoginPopup");
 const adminPopup       = document.getElementById("adminPopup");
@@ -34,10 +35,7 @@ const replyStatus      = document.getElementById("replyStatus");
 const sendReplyBtn     = document.getElementById("sendReplyBtn");
 const bgMusic          = document.getElementById("bgMusic");
 
-// In-memory admin auth token (HTTP Basic)
-let adminAuthToken = null; // e.g., "Basic xxxxxxxxx"
-
-// Navigation stack
+let adminAuthToken = null; // Admin Basic token
 const navStack = [];
 
 // Toast
@@ -107,7 +105,21 @@ function ensureStars(count=120){ if (nightSky.querySelector(".star")) return; co
 function randomizePlane(){ const top=12+Math.random()*35; const dur=14+Math.random()*10; nightSky.style.setProperty("--plane-top", `${top}%`); nightSky.style.setProperty("--plane-dur", `${dur}s`); }
 let shootingTimer=null; function sporadicShootingStars(){ if (shootingTimer) clearTimeout(shootingTimer); const makeOne=()=>{ if (!document.body.classList.contains("night")) return; const star=document.createElement("div"); star.className="shootingStar"; const y=5+Math.random()*45; const x=Math.random()*40; const angle=-20-Math.random()*20; star.style.top=`${y}vh`; star.style.left=`${x}vw`; star.style.setProperty("--angle", `${angle}deg`); nightSky.appendChild(star); setTimeout(()=>star.remove(),1800); shootingTimer=setTimeout(makeOne,1800+Math.random()*3000); }; shootingTimer=setTimeout(makeOne,1200); }
 function startPetals(count=18){ const reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches; const actual=reduce?2:count; for(let i=0;i<actual;i++){ const p=document.createElement("div"); p.className="petal"; p.style.setProperty("--size", 12+Math.random()*22+"px"); p.style.setProperty("--x", Math.random()*100+"vw"); p.style.setProperty("--drift", (8+Math.random()*18)+"vw"); p.style.setProperty("--dur", (8+Math.random()*6)+"s"); document.body.appendChild(p); setTimeout(()=>p.remove(),12000); } }
-function startBubbles(){ const container=document.querySelector(".bubbles"); if (!container) return; if (container.childElementCount>0) return; for(let i=0;i<20;i++){ const b=document.createElement("div"); b.className="bubble"; b.style.left=Math.random()*100+"vw"; b.style.animationDelay=(Math.random()*5).toFixed(2)+"s"; b.style.width=b.style.height=8+Math.floor(Math.random()*14)+"px"; container.appendChild(b);} }
+function startBubbles(){
+  const container=document.querySelector(".bubbles");
+  if (!container) return;
+  if (container.childElementCount>0) return;
+  for(let i=0;i<22;i++){
+    const b=document.createElement("div");
+    b.className="bubble";
+    const size = 8 + Math.floor(Math.random()*16);
+    b.style.left = Math.random()*100 + "vw";
+    b.style.width = b.style.height = size + "px";
+    b.style.animationDelay = (Math.random()*6).toFixed(2) + "s";
+    b.style.animationDuration = (9 + Math.random()*6).toFixed(2) + "s";
+    container.appendChild(b);
+  }
+}
 
 // Typewriter
 const letterLines = [
@@ -159,6 +171,12 @@ function sprinkleOverlayHearts(){
 function openLoveLetter(){
   enableNight(); openPopup(loveLetterPopup); typewriteLetter(loveLetterContainer); startPetals(20); sprinkleOverlayHearts();
   setTimeout(()=>setArrowOffsetPath(), 50); window.addEventListener('resize', setArrowOffsetPath, { passive:true });
+  // Set date stamp
+  if (dateStamp) {
+    const d = new Date();
+    const opts = { year:'numeric', month:'short', day:'numeric' };
+    dateStamp.textContent = d.toLocaleDateString(undefined, opts);
+  }
 }
 
 // Reply save – NO preflight (no custom headers)
@@ -180,16 +198,13 @@ async function sendReply(){
 }
 
 /* ===================== ADMIN ===================== */
-/** Open Admin – if not authenticated, show Admin Login popup */
 function openAdmin(){
   if (!adminAuthToken) {
-    // show login popup
     document.getElementById("adminUser").value = "";
     document.getElementById("adminPass").value = "";
     document.getElementById("adminLoginStatus").textContent = "";
     openPopup(adminLoginPopup);
   } else {
-    // already authed
     adminReplies.textContent = "(loading…)";
     adminStatus.textContent = "";
     openPopup(adminPopup);
@@ -198,35 +213,19 @@ function openAdmin(){
 }
 function closeAdmin(silent=false){ closePopup(adminPopup); if (!silent) showToast("Admin closed"); }
 function closeAdminLogin(silent=false){ closePopup(adminLoginPopup); if (!silent) showToast("Admin login closed"); }
+function buildAdminAuth(user, pass){ return "Basic " + btoa(`${user}:${pass}`); }
 
-function buildAdminAuth(user, pass){
-  return "Basic " + btoa(`${user}:${pass}`);
-}
-
-/** Try admin login by calling /replies?limit=1 with Authorization */
 async function adminLogin(){
   const user = (document.getElementById("adminUser").value || "").trim();
   const pass = (document.getElementById("adminPass").value || "").trim();
   const status = document.getElementById("adminLoginStatus");
-
-  if (!user || !pass){
-    status.textContent = "Please enter admin username and password.";
-    return;
-  }
-
+  if (!user || !pass){ status.textContent = "Please enter admin username and password."; return; }
   const token = buildAdminAuth(user, pass);
   status.textContent = "Authenticating…";
   try{
-    const res = await fetch(`${REPLIES_ENDPOINT}?limit=1`, {
-      method: "GET",
-      headers: { "Authorization": token }
-    });
-    if (res.status === 401) { status.textContent = "Invalid admin credentials."; return; }
-    if (!res.ok) {
-      const text = await res.text().catch(()=> "");
-      throw new Error(`HTTP ${res.status} ${text}`);
-    }
-    // ok -> store token and open admin view
+    const res = await fetch(`${REPLIES_ENDPOINT}?limit=1`, { method:"GET", headers:{ "Authorization": token } });
+    if (res.status === 401){ status.textContent = "Invalid admin credentials."; return; }
+    if (!res.ok){ const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
     adminAuthToken = token;
     status.textContent = "Authenticated.";
     closeAdminLogin(true);
@@ -234,71 +233,122 @@ async function adminLogin(){
     adminStatus.textContent = "";
     openPopup(adminPopup);
     refreshReplies();
-  }catch(e){
-    console.error("adminLogin error:", e);
-    status.textContent = "Login failed. Try again.";
-  }
+  }catch(e){ console.error("adminLogin error:", e); status.textContent = "Login failed. Try again."; }
 }
-
-// Helper for fetch with admin Authorization header
 async function adminFetch(url, options = {}){
   const headers = Object.assign({}, options.headers || {});
   headers["Authorization"] = adminAuthToken || "";
   return fetch(url, Object.assign({}, options, { headers }));
 }
-
-// Load replies (last 100)
 async function refreshReplies(){
   adminStatus.textContent = "Loading…";
   try{
-    const res = await adminFetch(`${REPLIES_ENDPOINT}?limit=100`, { method: "GET" });
-    if (res.status === 401) { adminStatus.textContent = "Unauthorized. Please login as admin again."; adminReplies.textContent = "(unauthorized)"; adminAuthToken = null; closeAdmin(); openAdmin(); return; }
-    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
+    const res = await adminFetch(`${REPLIES_ENDPOINT}?limit=100`, { method:"GET" });
+    if (res.status === 401){ adminStatus.textContent = "Unauthorized. Please login as admin again."; adminReplies.textContent="(unauthorized)"; adminAuthToken=null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok){ const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
     const txt = await res.text();
     adminReplies.textContent = txt || "(no replies yet)";
     adminStatus.textContent = "Loaded";
-  }catch(e){
-    console.error("refreshReplies error:", e);
-    adminStatus.textContent = "Failed to load replies.";
-    adminReplies.textContent = "(error)";
-  }
+  }catch(e){ console.error("refreshReplies error:", e); adminStatus.textContent = "Failed to load replies."; adminReplies.textContent="(error)"; }
 }
-
-// Download replies with Authorization (create Blob)
 async function downloadReplies(){
   try{
-    const res = await adminFetch(`${REPLIES_ENDPOINT}/download`, { method: "GET" });
-    if (res.status === 401) { showToast("Unauthorized. Login as admin"); adminAuthToken = null; closeAdmin(); openAdmin(); return; }
-    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
+    const res = await adminFetch(`${REPLIES_ENDPOINT}/download`, { method:"GET" });
+    if (res.status === 401){ showToast("Unauthorized. Login as admin"); adminAuthToken=null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok){ const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
     const blob = await res.blob();
     const url  = URL.createObjectURL(blob);
     const a    = document.createElement("a");
     a.href = url; a.download = "valentine_replies.txt";
     document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-  }catch(e){
-    console.error("downloadReplies error:", e);
-    showToast("Download failed");
-  }
+  }catch(e){ console.error("downloadReplies error:", e); showToast("Download failed"); }
 }
-
-// Clear replies (POST) with Authorization
 async function clearReplies(){
   if (!confirm("Are you sure you want to clear all replies?")) return;
   adminStatus.textContent = "Clearing…";
   try{
-    const res = await adminFetch(`${REPLIES_ENDPOINT}/clear`, { method: "POST" });
-    if (res.status === 401) { adminStatus.textContent = "Unauthorized. Please login again."; adminAuthToken=null; closeAdmin(); openAdmin(); return; }
-    if (!res.ok) { const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
-    adminStatus.textContent = "Cleared.";
-    adminReplies.textContent = "(no replies yet)";
-  }catch(e){
-    console.error("clearReplies error:", e);
-    adminStatus.textContent = "Failed to clear.";
-  }
+    const res = await adminFetch(`${REPLIES_ENDPOINT}/clear`, { method:"POST" });
+    if (res.status === 401){ adminStatus.textContent="Unauthorized. Please login again."; adminAuthToken=null; closeAdmin(); openAdmin(); return; }
+    if (!res.ok){ const t=await res.text().catch(()=> ""); throw new Error(`HTTP ${res.status} ${t}`); }
+    adminStatus.textContent = "Cleared."; adminReplies.textContent = "(no replies yet)";
+  }catch(e){ console.error("clearReplies error:", e); adminStatus.textContent = "Failed to clear."; }
 }
 
-// Expose
+/* ===================== BEAUTY EXTRAS ===================== */
+/** Parallax for moon & bubbles */
+(function enableParallax(){
+  const moon = document.querySelector(".moon");
+  const bubbles = document.querySelector(".bubbles");
+  function onMove(e){
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    const x = (e.clientX ?? cx) - cx;
+    const y = (e.clientY ?? cy) - cy;
+    if (moon){
+      const fx = 0.03; // moon stronger
+      moon.style.transform = `translate(${(-x*fx).toFixed(1)}px, ${(-y*fx).toFixed(1)}px)`;
+    }
+    if (bubbles){
+      const fx2 = 0.015; // subtle
+      bubbles.style.transform = `translate(${(x*fx2).toFixed(1)}px, ${(y*fx2).toFixed(1)}px)`;
+    }
+  }
+  window.addEventListener("mousemove", onMove, { passive:true });
+})();
+
+/** Typing placeholders on login inputs */
+(function typingPlaceholders(){
+  const u = document.getElementById("username");
+  const p = document.getElementById("password");
+  const phrasesU = ["Type your username…", "Hint: sathya"];
+  const phrasesP = ["Type your password…", "Hint: love"];
+  function typeLoop(el, texts){
+    let i=0, pos=0, del=false;
+    function tick(){
+      const t = texts[i];
+      if (!del){
+        pos++;
+        el.setAttribute("placeholder", t.slice(0,pos));
+        if (pos>=t.length){ del=true; setTimeout(tick, 1200); return; }
+      }else{
+        pos--;
+        el.setAttribute("placeholder", t.slice(0,pos));
+        if (pos<=0){ del=false; i=(i+1)%texts.length; }
+      }
+      setTimeout(tick, del? 28 : 38);
+    }
+    tick();
+  }
+  if (u) typeLoop(u, phrasesU);
+  if (p) typeLoop(p, phrasesP);
+})();
+
+/** YES button heart burst */
+(function heartsBurstOnYes(){
+  const btn = document.getElementById("yesBtn");
+  if (!btn) return;
+  btn.addEventListener("click", (e)=>{
+    const rect = btn.getBoundingClientRect();
+    const cx = rect.left + rect.width/2;
+    const cy = rect.top + rect.height/2;
+    for (let i=0;i<12;i++){
+      const h = document.createElement("div");
+      h.className = "burstHeart";
+      h.style.left = `${cx}px`;
+      h.style.top  = `${cy}px`;
+      const angle = Math.random()*Math.PI*2;
+      const radius = 40 + Math.random()*36;
+      const dx = Math.cos(angle)*radius;
+      const dy = Math.sin(angle)*radius*-1; // go up-ish
+      h.style.setProperty("--dx", `${dx.toFixed(1)}px`);
+      h.style.setProperty("--dy", `${dy.toFixed(1)}px`);
+      document.body.appendChild(h);
+      setTimeout(()=> h.remove(), 950);
+    }
+  }, { passive:true });
+})();
+
+// Expose (existing)
 window.login=login; window.navBack=navBack; window.showMailIcon=showMailIcon;
 window.openReplyPopup=()=>{ replyText.value=""; replyStatus.textContent=""; openPopup(replyPopup); };
 window.closeReplyPopup=(s=false)=>{ closePopup(replyPopup); if (!s) showToast("Reply closed"); };
@@ -311,9 +361,10 @@ window.refreshReplies=refreshReplies; window.downloadReplies=downloadReplies; wi
 // Init
 window.addEventListener("DOMContentLoaded", ()=>{
   showLogin(false); startBubbles();
+
+  // Autofocus + Enter submit
   const u=document.getElementById('username'), p=document.getElementById('password');
   if (u) u.focus();
   const submitOnEnter=(e)=>{ if (e.key==='Enter'){ e.preventDefault(); login(); } };
   if (u) u.addEventListener('keydown', submitOnEnter); if (p) p.addEventListener('keydown', submitOnEnter);
 });
-

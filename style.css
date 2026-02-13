@@ -50,10 +50,38 @@ body {
 }
 .globalBack:hover { border-color: #ffffff; box-shadow: 0 0 10px rgba(255,255,255,0.25); }
 
-/* Hide bubbles at night */
+/* ===== LOVE BUBBLES (background ambience) ===== */
+.bubbles {
+  position: fixed;
+  inset: 0;
+  z-index: 0;            /* stay behind content */
+  pointer-events: none;
+  overflow: hidden;
+  will-change: transform;
+}
+.bubble {
+  position: absolute;
+  bottom: -10vh;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(255,255,255,0.15));
+  box-shadow: 0 0 12px rgba(255,255,255,0.25);
+  opacity: 0.75;
+  animation: rise 10s linear infinite;
+  filter: blur(0.2px);
+}
+@keyframes rise {
+  0%   { transform: translateY(0)      translateX(0)     scale(0.9); opacity: 0.0; }
+  10%  { opacity: 0.75; }
+  60%  { transform: translateY(-60vh)  translateX(6vw)   scale(1.05); }
+  100% { transform: translateY(-110vh) translateX(10vw)  scale(1.1); opacity: 0; }
+}
+
+/* Hide bubbles during night scene (kept) */
 body.night .bubbles { display: none; }
 
-/* ===== NIGHT SKY ===== */
+/* ===== NIGHT SKY (with subtle auto-scroll) ===== */
 .nightSky {
   position: fixed; inset: 0; z-index: 0;
   opacity: 0; pointer-events: none; transition: opacity 0.9s ease;
@@ -61,6 +89,11 @@ body.night .bubbles { display: none; }
     radial-gradient(1200px 800px at 75% 20%, rgba(160,180,255,0.45), rgba(14,14,28,0.85)),
     linear-gradient(180deg, rgba(14,14,28,0.92) 0%, rgba(22,22,40,0.96) 100%);
   box-shadow: inset 0 0 140px rgba(220,200,255,0.08);
+  animation: skyScroll 120s linear infinite;
+}
+@keyframes skyScroll {
+  0%   { background-position: 0px 0px, 0 0; }
+  100% { background-position: 0px -60px, 0 0; }
 }
 body.night .nightSky { opacity: 1; }
 
@@ -71,13 +104,14 @@ body.night .nightSky { opacity: 1; }
 }
 @keyframes twinkle { 0%,100%{opacity:.25;transform:scale(1)} 50%{opacity:1;transform:scale(1.4)} }
 
-/* 🌕 Moon */
+/* 🌕 Moon (parallax-enabled) */
 .moon {
   position: absolute; top: 7%; right: 7%; width: 130px; height: 130px; border-radius: 50%;
   background:
     radial-gradient(circle at 30% 30%, #fffdf4 0%, #fff2c9 45%, #ffe1a3 65%, #f3cc81 75%, #d5b062 100%);
   box-shadow: 0 0 40px rgba(255,235,190,0.95), 0 0 130px rgba(255,220,160,0.8);
   animation: moonPulse 6.5s ease-in-out infinite;
+  will-change: transform;
 }
 @keyframes moonPulse {
   0%,100%{box-shadow:0 0 36px rgba(255,235,190,0.95),0 0 120px rgba(255,220,160,0.75);transform:scale(1)}
@@ -130,12 +164,17 @@ body:not(.night) .plane { display:none; }
   100%{transform:translate3d(calc(var(--drift,12vw)*1.4),110vh,0) rotate(310deg);opacity:.85}
 }
 
-/* ===== HOME (CENTERED) ===== */
+/* ===== HOME (CENTERED, shifted up) ===== */
 .home {
   min-height: 100vh; width: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; z-index: 1; position: relative;
+  transform: translateY(-6vh);
 }
+@media (max-width: 560px){
+  .home { transform: translateY(-3vh); }
+}
+
 .welcome{font-size:1.4rem; opacity:.9}
 .name{
   font-size:5rem; font-weight:bold; letter-spacing:10px;
@@ -145,7 +184,30 @@ body:not(.night) .plane { display:none; }
 .quote{margin-top:10px; font-style:italic; color:#ffd1e8}
 .question{margin-top:30px; font-size:1.6rem}
 button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-size:1.1rem; cursor:pointer}
-.yes{background:linear-gradient(45deg,#ff2f92,#ff77c8); color:white; box-shadow:0 0 20px #ff2f92}
+.yes{
+  background:linear-gradient(45deg,#ff2f92,#ff77c8);
+  color:white;
+  box-shadow:0 0 20px #ff2f92;
+  transition: transform .12s ease, box-shadow .2s ease;
+}
+.yes:hover{ transform: translateY(-2px) scale(1.02); box-shadow: 0 12px 28px rgba(255,47,146,0.35); }
+
+/* Tiny burst hearts (for YES click) */
+.burstHeart {
+  position: fixed; width:14px; height:14px; transform: rotate(45deg);
+  background: radial-gradient(circle at 30% 30%, #ff7ab3 0%, #ff408d 60%, #ff2f92 100%);
+  border-radius: 3px; pointer-events:none; z-index: 10;
+  filter: drop-shadow(0 2px 6px rgba(255,80,140,0.5));
+  animation: popHeart 900ms ease-out forwards;
+}
+.burstHeart::before, .burstHeart::after { content:""; position:absolute; width:14px; height:14px; border-radius:50%; background:inherit }
+.burstHeart::before { top:-7px; left:0 } .burstHeart::after{ left:-7px; top:0 }
+@keyframes popHeart {
+  0%   { opacity: 0; transform: translate(0,0)  rotate(45deg) scale(0.6); }
+  10%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--dx,0px), var(--dy,-60px)) rotate(45deg) scale(1.05); }
+}
 
 /* ===== POPUPS BASE ===== */
 .popup {
@@ -178,6 +240,16 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 .loveHeader .heartBadge { width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,0.18); display:grid; place-items:center; box-shadow:0 4px 10px rgba(0,0,0,0.15) }
 .loveHeader .heartBadge::before { content:"💗"; font-size:22px }
 .loveHeader .titleText { font-size: var(--letter-title-size); font-weight: 700; letter-spacing: .3px }
+
+/* NEW: date stamp on the right */
+.loveHeader .dateStamp {
+  margin-left: auto;
+  font-size: 0.95rem;
+  opacity: 0.95;
+  color: #fff;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+}
+
 .loveBody {
   padding: var(--letter-padding);
   background:
@@ -251,8 +323,7 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 #replyText::placeholder{ color:rgba(255,255,255,0.6) }
 .replyActions{ display:flex; gap:10px; justify-content:center; margin-top:14px }
 .sendReply{
-  padding:10px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.35);
-  background:#2a2a2a; color:#fff; cursor:pointer
+  padding:10px 20px; border-radius:999px; border:1px solid rgba(255,255,255,0.35); background:#2a2a2a; color:#fff; cursor:pointer
 }
 .sendReply[disabled]{ opacity:.6; cursor:not-allowed }
 .replyStatus{ margin-top:10px; text-align:center }
@@ -266,11 +337,15 @@ button{padding:12px 30px; margin:10px; border-radius:30px; border:none; font-siz
 }
 .toast.show{ opacity:1 }
 
-/* ===== LOGIN (CENTERED, NO RECTANGLE) ===== */
+/* ===== LOGIN (CENTERED, shifted up) ===== */
 .loginScreen{
   min-height: 100vh; width: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 10px; padding: 20px; position: relative; z-index: 1;
+  transform: translateY(-6vh);
+}
+@media (max-width: 560px){
+  .loginScreen { transform: translateY(-3vh); }
 }
 .loginScreen h1{
   font-size: 2.4rem; letter-spacing: 0.5px; color: #fff;
