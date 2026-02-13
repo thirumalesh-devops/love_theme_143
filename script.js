@@ -123,16 +123,24 @@ function startBubbles(){
 
 // Typewriter
 const letterLines = [
-  "Dear Sathya,",
-  "",
-  "Every day with you is a new reason to smile.",
-  "You’re the calm in my chaos and the spark in my sky.",
-  "I wrote this to say one simple thing:",
-  "",
-  "Will you be my Valentine? 💖",
-  "",
-  "Yours,",
-  "Thiru"
+"My Dear Pilla ❤️,",
+"",
+"It’s not about Valentine’s Day, Hug Day, Kiss Day, or Promise Day for me. I don’t believe that love should be celebrated only on special days.",
+"",
+"Whenever I am with you, I feel like all those days come together at once. Your presence makes me feel loved, safe, cared for, confident, and even a little crazy in the best way. The way you smell hits me differently — no perfume in this world can ever match your natural fragrance.",
+"",
+"Your touch makes me feel like flowers blooming on a dry tree. Everything feels new when I see you. Normally, I think about you every minute… but when we fight, I think about you every single second.",
+"",
+"When I walk with you, every step feels like I’m walking in a different world. The way you treat me makes me feel like a child again — innocent and happy. The way you look at me makes me feel special.",
+"",
+"This Valentine’s Day is not a special day for me… because every day becomes special when I am with you.",
+"",
+"I want you as my better half — my strength, my support, my happiness. I want to be everything for you, just like you are everything to me.",
+"",
+"I worship you ❤️",
+"Thank you for coming into my life and making it better.",
+
+"Forever yours. 💫"	
 ];
 async function typewriteLetter(targetEl){
   targetEl.innerHTML=""; const cursor=document.createElement("span"); cursor.className="cursor"; cursor.textContent=" "; const p=document.createElement("div"); targetEl.appendChild(p); targetEl.appendChild(cursor);
